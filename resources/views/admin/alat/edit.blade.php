@@ -18,33 +18,43 @@
                         </nav>
                     </div>
                 </div>
+                <div class="col-5 align-self-center">
+                    <div class="float-right">
+                        <a href="{{ route('alat.index') }}" class="btn btn-sm btn-secondary font-weight-medium">
+                            <i class="fa fa-arrow-left"></i> Kembali
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="container-fluid">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="card-title m-0">Form Edit Alat & Inventaris</h4>
-                        <a href="{{ route('alat.index') }}" class="btn btn-sm btn-secondary">
-                            <i class="fa fa-arrow-left"></i> Kembali
-                        </a>
+        <div class="container-fluid pb-5">
+            <div class="card border-0 shadow-sm rounded-lg">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                        <h4 class="card-title m-0 font-weight-bold text-dark">
+                            <i class="fas fa-edit text-primary mr-2"></i> Form Edit Alat & Inventaris
+                        </h4>
                     </div>
 
                     <form action="{{ route('alat.update', $alat->id_alat) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
+
+                        {{-- Baris 1: Lab & Nama --}}
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
+                                <div class="form-group mb-4">
                                     <label class="form-label text-dark font-weight-medium">Lokasi Laboratorium <span
                                             class="text-danger">*</span></label>
                                     <select class="form-control select2 @error('id_lab') is-invalid @enderror"
                                         name="id_lab" required>
+                                        <option value="" disabled>Pilih Laboratorium</option>
                                         @foreach ($lab as $l)
                                             <option value="{{ $l->id_lab }}"
                                                 {{ old('id_lab', $alat->id_lab) == $l->id_lab ? 'selected' : '' }}>
-                                                {{ $l->nama }}</option>
+                                                {{ $l->nama }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     @error('id_lab')
@@ -53,7 +63,7 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
+                                <div class="form-group mb-4">
                                     <label class="form-label text-dark font-weight-medium">Nama Alat <span
                                             class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('nama_alat') is-invalid @enderror"
@@ -65,33 +75,9 @@
                             </div>
                         </div>
 
+                        {{-- Baris 2: Tahun & Jumlah --}}
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label text-dark font-weight-medium">Spesifikasi Alat <span
-                                            class="text-danger">*</span></label>
-                                    <textarea class="form-control @error('spesifikasi_alat') is-invalid @enderror" name="spesifikasi_alat" rows="2"
-                                        required>{{ old('spesifikasi_alat', $alat->spesifikasi_alat) }}</textarea>
-                                    @error('spesifikasi_alat')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label text-dark font-weight-medium">Instruksi Kerja (SOP) <span
-                                            class="text-danger">*</span></label>
-                                    <textarea class="form-control @error('instruksi_kerja') is-invalid @enderror" name="instruksi_kerja" rows="2"
-                                        required>{{ old('instruksi_kerja', $alat->instruksi_kerja) }}</textarea>
-                                    @error('instruksi_kerja')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
                                 <div class="form-group mb-4">
                                     <label class="form-label text-dark font-weight-medium">Tahun Pengadaan <span
                                             class="text-danger">*</span></label>
@@ -104,7 +90,7 @@
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group mb-4">
                                     <label class="form-label text-dark font-weight-medium">Jumlah Unit <span
                                             class="text-danger">*</span></label>
@@ -115,26 +101,81 @@
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group mb-4">
-                                    <label class="form-label text-dark font-weight-medium">Foto Alat</label>
-                                    <input type="file" class="form-control-file @error('foto') is-invalid @enderror"
-                                        name="foto" accept="image/jpeg,image/png,image/jpg">
-                                    <small class="text-muted d-block mt-1">Kosongkan jika tidak mengubah foto.</small>
+                        </div>
 
-                                    @if ($alat->foto && Storage::disk('public')->exists($alat->foto))
-                                        <div class="mt-2">
-                                            <img src="{{ asset('storage/' . $alat->foto) }}" alt="Foto Alat"
-                                                class="img-thumbnail" width="100">
-                                        </div>
-                                    @endif
+                        {{-- Baris 3: Spesifikasi & SOP --}}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label class="form-label text-dark font-weight-medium">Spesifikasi Alat <span
+                                            class="text-danger">*</span></label>
+                                    <textarea class="form-control @error('spesifikasi_alat') is-invalid @enderror" name="spesifikasi_alat" rows="3"
+                                        required>{{ old('spesifikasi_alat', $alat->spesifikasi_alat) }}</textarea>
+                                    @error('spesifikasi_alat')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label class="form-label text-dark font-weight-medium">Instruksi Kerja (SOP) <span
+                                            class="text-danger">*</span></label>
+                                    <textarea class="form-control @error('instruksi_kerja') is-invalid @enderror" name="instruksi_kerja" rows="3"
+                                        required>{{ old('instruksi_kerja', $alat->instruksi_kerja) }}</textarea>
+                                    @error('instruksi_kerja')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
 
-                        <div class="form-actions mt-3 border-top pt-4">
-                            <button type="submit" class="btn btn-sm btn-dark">
-                                <i class="fa fa-save"></i> Simpan Perubahan
+                        {{-- Baris 4: Drag & Drop Foto --}}
+                        <div class="row">
+                            <div class="col-md-12 form-group mb-4">
+                                <label class="form-label text-dark font-weight-medium">Ganti Foto Alat</label>
+                                <small class="text-muted d-block mb-3">Biarkan jika tidak ingin mengubah foto saat
+                                    ini.</small>
+
+                                {{-- Drag Zone (Sembunyi jika ada foto, dikontrol via $hasFoto dari controller) --}}
+                                <div class="drag-drop-zone custom-radius {{ $hasFoto ? 'd-none' : '' }}" id="dragDropZone">
+                                    <div class="dz-message">
+                                        <i class="fas fa-image text-primary mb-2 fa-3x"></i>
+                                        <h6 class="font-weight-bold text-dark mb-1">Tarik & Lepas Foto di Sini</h6>
+                                        <p class="text-muted font-13 mb-3">atau klik untuk menelusuri file</p>
+                                        <span class="badge bg-light-secondary text-secondary px-3 py-1 border">Maks: 2MB |
+                                            JPG, PNG</span>
+                                    </div>
+                                    <input type="file" id="foto" name="foto" class="d-none"
+                                        accept="image/jpeg,image/png,image/jpg">
+                                </div>
+                                @error('foto')
+                                    <div class="text-danger font-13 mt-2">{{ $message }}</div>
+                                @enderror
+
+                                {{-- Preview Zone (Dipanggil menggunakan $urlFoto dari Controller) --}}
+                                <div id="previewContainer"
+                                    class="mt-2 text-center p-4 border custom-radius bg-light {{ $hasFoto ? '' : 'd-none' }}">
+                                    <img id="imagePreview" src="{{ $urlFoto }}" alt="Preview Foto"
+                                        class="img-fluid rounded shadow-sm mb-3 border border-white"
+                                        style="width: 250px; height: 180px; object-fit: cover;">
+                                    <div class="d-flex justify-content-center">
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-primary rounded-pill px-3 mr-2"
+                                            onclick="document.getElementById('foto').click()">
+                                            <i class="fas fa-sync-alt mr-1"></i> Ganti Foto Baru
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger rounded-pill px-3"
+                                            id="removeImage">
+                                            <i class="fas fa-times mr-1"></i> Batal / Hapus
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions mt-4 border-top pt-4 text-right">
+                            <button type="submit" class="btn btn-sm btn-primary shadow-sm font-weight-medium px-4">
+                                <i class="fa fa-save mr-2"></i> Simpan Perubahan
                             </button>
                         </div>
                     </form>
@@ -142,15 +183,109 @@
             </div>
         </div>
     </div>
+
+    {{-- CSS Khusus Drag & Drop --}}
+    <style>
+        .custom-radius {
+            border-radius: 12px;
+        }
+
+        .drag-drop-zone {
+            border: 2px dashed #b8c2cc;
+            background-color: #f8f9fc;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drag-drop-zone:hover,
+        .drag-drop-zone.dragover {
+            background-color: #e3f2fd;
+            border-color: #1171ef;
+        }
+
+        .drag-drop-zone .dz-message {
+            pointer-events: none;
+        }
+    </style>
 @endsection
 
 @push('scripts')
     <script>
         $(document).ready(function() {
+            // Select2 Init
             $('.select2').select2({
                 theme: "bootstrap-5",
                 width: '100%'
             });
+
+            // Logika Drag & Drop Foto
+            const dropZone = document.getElementById('dragDropZone');
+            const fileInput = document.getElementById('foto');
+            const previewContainer = document.getElementById('previewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+            const removeBtn = document.getElementById('removeImage');
+
+            // Simpan referensi foto awal dari database
+            const oldImageSrc = imagePreview.src;
+
+            if (dropZone) {
+                dropZone.addEventListener('click', () => fileInput.click());
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                });
+                dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                    if (e.dataTransfer.files.length) {
+                        fileInput.files = e.dataTransfer.files;
+                        handlePreview();
+                    }
+                });
+            }
+
+            if (fileInput) fileInput.addEventListener('change', handlePreview);
+
+            function handlePreview() {
+                if (fileInput.files && fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    if (file.size > 2097152) { // 2MB Limit
+                        alert('Ukuran file terlalu besar! Maksimal 2MB.');
+                        fileInput.value = '';
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        dropZone.classList.add('d-none');
+                        previewContainer.classList.remove('d-none');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            if (removeBtn) {
+                removeBtn.addEventListener('click', () => {
+                    fileInput.value = '';
+                    // Jika data sebelumnya punya foto, kembalikan ke foto tersebut
+                    if (oldImageSrc && oldImageSrc !== window.location.href) {
+                        imagePreview.src = oldImageSrc;
+                    } else {
+                        // Jika tidak punya foto, kosongkan dan tampilkan ulang dropzone
+                        imagePreview.src = '';
+                        previewContainer.classList.add('d-none');
+                        dropZone.classList.remove('d-none');
+                    }
+                });
+            }
         });
     </script>
 @endpush

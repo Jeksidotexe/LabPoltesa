@@ -6,7 +6,7 @@
         <div class="page-breadcrumb">
             <div class="row align-items-center">
                 <div class="col-md-6 col-8 align-self-center">
-                    <h3 class="page-title mb-0 p-0 text-dark font-weight-medium">Detail Alat Inventaris</h3>
+                    <h3 class="page-title mb-0 p-0 text-dark font-weight-medium">Detail Alat</h3>
                     <div class="d-flex align-items-center mt-1">
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb m-0 p-0">
@@ -20,7 +20,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-4 align-self-center text-right">
-                    <a href="{{ route('alat.index') }}" class="btn btn-sm btn-outline-secondary">
+                    <a href="{{ route('alat.index') }}" class="btn btn-sm btn-secondary font-weight-medium">
                         <i class="fas fa-arrow-left mr-2"></i>Kembali
                     </a>
                 </div>
@@ -33,23 +33,11 @@
                 <div class="col-lg-4 col-md-12">
                     <div class="card">
                         <div class="card-body text-center">
-                            @if ($alat->foto)
-                                <img src="{{ Storage::url($alat->foto) }}" alt="{{ $alat->nama_alat }}"
-                                    class="img-fluid rounded" style="max-height: 250px; width: 100%; object-fit: cover;">
-                            @else
-                                <div class="bg-light d-flex flex-column align-items-center justify-content-center rounded"
-                                    style="height: 250px; border: 2px dashed #ddd;">
-                                    <i data-feather="camera-off" class="text-muted mb-2"
-                                        style="width: 45px; height: 45px; opacity: 0.5;"></i>
-                                    <span class="text-muted font-14">Tidak ada foto</span>
-                                </div>
-                            @endif
-
+                            <img src="{{ $urlFoto }}" alt="{{ $alat->nama_alat }}"
+                                class="img-fluid rounded border shadow-sm"
+                                style="max-height: 250px; width: 100%; object-fit: cover;">
                             <h4 class="card-title mt-4 mb-1 text-dark">{{ $alat->nama_alat }}</h4>
-                            <h6 class="card-subtitle text-muted mb-0">Kode Inventaris:
-                                INV-{{ str_pad($alat->id_alat, 4, '0', STR_PAD_LEFT) }}</h6>
                         </div>
-
                         <div class="card-body border-top">
                             <div class="row text-center">
                                 <div class="col-6 border-right">
@@ -80,7 +68,7 @@
                         <div class="card-body">
                             <h4 class="card-title text-dark mb-4">
                                 <i data-feather="map-pin" class="text-danger mr-2" style="width: 20px;"></i> Lokasi
-                                Penyimpanan (Laboratorium)
+                                Penyimpanan
                             </h4>
 
                             <div class="row">
@@ -99,7 +87,7 @@
                                             class="font-14 text-muted font-weight-normal">Orang</span></h5>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <h6 class="text-muted font-weight-normal mb-1">Status Operasional Lab</h6>
+                                    <h6 class="text-muted font-weight-normal mb-1">Status Operasional Laboratorium</h6>
                                     @if ($alat->lab && $alat->lab->status == 'Aktif')
                                         <span class="badge badge-success px-3 py-1 font-12">Aktif</span>
                                     @else

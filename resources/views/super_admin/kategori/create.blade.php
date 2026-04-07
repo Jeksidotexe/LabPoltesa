@@ -18,6 +18,13 @@
                         </nav>
                     </div>
                 </div>
+                <div class="col-5 align-self-center">
+                    <div class="float-right">
+                        <a href="{{ route('kategori.index') }}" class="btn btn-sm btn-secondary">
+                            <i class="fa fa-arrow-left"></i> Kembali
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="container-fluid">
@@ -25,9 +32,6 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="card-title m-0">Form Tambah Kategori Praktikum</h4>
-                        <a href="{{ route('kategori.index') }}" class="btn btn-sm btn-secondary">
-                            <i class="fa fa-arrow-left"></i> Kembali
-                        </a>
                     </div>
                     <form action="{{ route('kategori.store') }}" method="POST">
                         @csrf

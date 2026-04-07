@@ -24,11 +24,11 @@ class AlatController extends Controller
             ->of($alat)
             ->addIndexColumn()
             ->addColumn('foto', function ($alat) {
-                // Logika foto seperti pada entitas lain
                 $url = $alat->foto && Storage::disk('public')->exists($alat->foto)
                     ? asset('storage/' . $alat->foto)
-                    : asset('master/assets/images/placeholder-lab.jpg'); // Gunakan placeholder default
-                return '<img src="' . $url . '" alt="foto alat" class="rounded" width="60" height="40" style="object-fit: cover;">';
+                    : 'https://placehold.co/200x150/eeeeee/999999?text=No+Foto';
+
+                return '<img src="' . $url . '" alt="foto alat" class="rounded shadow-sm border" width="60" height="40" style="object-fit: cover;">';
             })
             ->addColumn('nama_lab', function ($alat) {
                 return $alat->lab ? $alat->lab->nama : '-';
@@ -96,14 +96,25 @@ class AlatController extends Controller
     {
         // Panggil data alat beserta relasi nama laboratoriumnya
         $alat = Alat::with('lab')->findOrFail($id);
-        return view('admin.alat.show', compact('alat'));
+
+        $urlFoto = $alat->foto && Storage::disk('public')->exists($alat->foto)
+            ? asset('storage/' . $alat->foto)
+            : 'https://placehold.co/600x400/eeeeee/999999?text=Tidak+Ada+Foto';
+
+        // Kirim variabel $alat dan $urlFoto ke view
+        return view('admin.alat.show', compact('alat', 'urlFoto'));
     }
 
     public function edit($id)
     {
         $alat = Alat::findOrFail($id);
         $lab = Laboratorium::orderBy('nama', 'asc')->get();
-        return view('admin.alat.edit', compact('alat', 'lab'));
+
+        $hasFoto = $alat->foto && Storage::disk('public')->exists($alat->foto);
+        $urlFoto = $hasFoto ? asset('storage/' . $alat->foto) : '';
+
+        // Kirim variabel $alat, $lab, $hasFoto, dan $urlFoto ke view
+        return view('admin.alat.edit', compact('alat', 'lab', 'hasFoto', 'urlFoto'));
     }
 
     public function update(Request $request, $id)

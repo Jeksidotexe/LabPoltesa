@@ -34,7 +34,7 @@
                     <div class="card">
                         <div class="card-body text-center">
                             <img src="{{ $urlFoto }}" alt="{{ $alat->nama_alat }}"
-                                class="img-fluid rounded border shadow-sm"
+                                class="img-fluid border shadow-sm"
                                 style="max-height: 250px; width: 100%; object-fit: cover;">
                             <h4 class="card-title mt-4 mb-1 text-dark">{{ $alat->nama_alat }}</h4>
                         </div>
@@ -42,7 +42,7 @@
                             <div class="row text-center">
                                 <div class="col-6 border-right">
                                     <p class="text-muted font-14 mb-1"><i data-feather="calendar" class="mr-1"
-                                            style="width: 14px;"></i> Tahun Masuk</p>
+                                            style="width: 14px;"></i> Tahun Pengadaan</p>
                                     <h5 class="font-weight-medium text-dark mb-0">{{ $alat->tahun_pengadaan ?? '-' }}</h5>
                                 </div>
                                 <div class="col-6">
@@ -107,7 +107,7 @@
                             <h4 class="card-title text-dark mb-3">
                                 <i data-feather="cpu" class="text-primary mr-2" style="width: 20px;"></i> Spesifikasi Teknis
                             </h4>
-                            <div class="bg-light p-3 rounded">
+                            <div class="border p-3">
                                 @if ($alat->spesifikasi_alat)
                                     <p class="text-dark mb-0" style="line-height: 1.7;">{!! nl2br(e($alat->spesifikasi_alat)) !!}</p>
                                 @else
@@ -121,13 +121,13 @@
                         <div class="card-body">
                             <h4 class="card-title text-dark mb-3">
                                 <i data-feather="clipboard" class="text-success mr-2" style="width: 20px;"></i> Instruksi
-                                Kerja / SOP Penggunaan
+                                Kerja
                             </h4>
-                            <div class="bg-light p-3 rounded">
+                            <div class="border p-3">
                                 @if ($alat->instruksi_kerja)
                                     <p class="text-dark mb-0" style="line-height: 1.7;">{!! nl2br(e($alat->instruksi_kerja)) !!}</p>
                                 @else
-                                    <p class="text-muted font-italic mb-0">- Instruksi kerja / SOP belum ditambahkan -</p>
+                                    <p class="text-muted font-italic mb-0">- Instruksi kerja belum ditambahkan -</p>
                                 @endif
                             </div>
                         </div>

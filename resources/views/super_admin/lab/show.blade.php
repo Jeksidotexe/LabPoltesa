@@ -1,8 +1,7 @@
 @extends('layouts.master')
 @section('title', 'Detail Laboratorium')
 @section('content')
-    <div class="page-wrapper" style="background-color: #fbfcfd;">
-        {{-- HEADER & ACTION BAR --}}
+    <div class="page-wrapper">
         <div class="page-breadcrumb pt-4 pb-0">
             <div class="row align-items-center">
                 <div class="col-md-7 col-12">
@@ -18,11 +17,11 @@
                 </div>
                 <div class="col-md-5 col-12 mt-2 mt-md-0 text-md-right">
                     <a href="{{ route('lab.index') }}"
-                        class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 font-12 font-weight-medium mr-2">
+                        class="btn btn-sm btn-outline-secondary font-12 font-weight-medium mr-2">
                         <i class="fa fa-arrow-left mr-1"></i> Kembali
                     </a>
                     <a href="{{ route('lab.edit', $lab->id_lab) }}"
-                        class="btn btn-sm btn-primary rounded-pill px-3 py-1 font-12 font-weight-medium">
+                        class="btn btn-sm btn-primary font-12 font-weight-medium">
                         <i data-feather="edit-2" class="mr-1" style="width: 12px; height: 12px;"></i> Edit
                     </a>
                 </div>
@@ -36,30 +35,30 @@
 
                 {{-- Sisi Kiri: Foto Lab --}}
                 <div class="col-lg-6 col-md-12 mb-3 mb-lg-0">
-                    <div class="bg-white p-2 border rounded-lg h-100">
+                    <div class="bg-white p-2 border h-100">
                         @php
                             $urlFoto =
                                 $lab->foto && Storage::disk('public')->exists($lab->foto)
                                     ? asset('storage/' . $lab->foto)
                                     : asset('images/default.jpg'); // Sesuaikan placeholder
                         @endphp
-                        <img src="{{ $urlFoto }}" alt="Foto {{ $lab->nama }}" class="w-100 h-100 rounded"
+                        <img src="{{ $urlFoto }}" alt="Foto {{ $lab->nama }}" class="w-100 h-100"
                             style="object-fit: cover; min-height: 280px; max-height: 350px;">
                     </div>
                 </div>
 
                 {{-- Sisi Kanan: Informasi Kunci --}}
                 <div class="col-lg-6 col-md-12 d-flex">
-                    <div class="bg-white p-4 p-md-5 border rounded-lg w-100">
+                    <div class="bg-white p-4 p-md-5 border w-100">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span
                                 class="text-muted font-12 font-weight-medium tracking-wider text-uppercase">{{ $lab->kode }}</span>
                             @if ($lab->status == 'Aktif')
                                 <span
-                                    class="badge bg-light-success text-success px-3 py-1 rounded-pill font-11 font-weight-bold">Beroperasi</span>
+                                    class="badge bg-light-success text-success font-11 font-weight-bold">Beroperasi</span>
                             @else
                                 <span
-                                    class="badge bg-light-danger text-danger px-3 py-1 rounded-pill font-11 font-weight-bold">Nonaktif</span>
+                                    class="badge bg-light-danger text-danger font-11 font-weight-bold">Nonaktif</span>
                             @endif
                         </div>
 
@@ -99,7 +98,7 @@
 
                 {{-- Kiri: Deskripsi Detail --}}
                 <div class="col-lg-8 col-md-12 mb-4">
-                    <div class="bg-white p-4 p-md-5 border rounded-lg h-100">
+                    <div class="bg-white p-4 p-md-5 border h-100">
                         <h5 class="text-dark font-weight-bold mb-4">
                             <i data-feather="align-left" class="text-primary mr-2"
                                 style="width: 18px; height: 18px; margin-top: -3px;"></i>Deskripsi
@@ -117,7 +116,7 @@
 
                 {{-- Kanan: Ringkasan Inventaris --}}
                 <div class="col-lg-4 col-md-12 mb-4 d-flex">
-                    <div class="bg-white p-4 border rounded-lg w-100 d-flex flex-column h-100">
+                    <div class="bg-white p-4 border w-100 d-flex flex-column h-100">
                         <h5 class="text-dark font-weight-bold mb-4 pb-2 border-bottom border-light">
                             <i data-feather="package" class="text-info mr-2"
                                 style="width: 18px; height: 18px; margin-top: -3px;"></i>Inventaris
@@ -126,7 +125,7 @@
                         <div class="row flex-grow-1">
                             <div class="col-6 pr-2 mb-2 d-flex">
                                 <div
-                                    class="bg-light-flat w-100 p-3 rounded-lg text-center d-flex flex-column justify-content-center align-items-center">
+                                    class="bg-light-flat w-100 p-3 text-center d-flex flex-column justify-content-center align-items-center">
                                     <i class="fas fa-tools text-muted mb-2 font-16"></i>
                                     <h2 class="m-0 font-weight-bold text-dark font-24">
                                         {{ $lab->alat ? $lab->alat->count() : 0 }}</h2>
@@ -137,7 +136,7 @@
                             </div>
                             <div class="col-6 pl-2 mb-2 d-flex">
                                 <div
-                                    class="bg-light-flat w-100 p-3 rounded-lg text-center d-flex flex-column justify-content-center align-items-center">
+                                    class="bg-light-flat w-100 p-3 text-center d-flex flex-column justify-content-center align-items-center">
                                     <i class="fas fa-cubes text-muted mb-2 font-16"></i>
                                     <h2 class="m-0 font-weight-bold text-dark font-24">
                                         {{ $lab->alat ? $lab->alat->sum('jumlah') : 0 }}</h2>
@@ -156,17 +155,6 @@
     </div>
 
     <style>
-        /* Desain Minimalis & Clean (Tanpa Efek Mencolok) */
-
-        /* Menghilangkan shadow global dan radius tajam */
-        .rounded-lg {
-            border-radius: 10px !important;
-        }
-
-        .rounded-pill {
-            border-radius: 50px !important;
-        }
-
         .border {
             border: 1px solid #e1e8ed !important;
         }

@@ -18,7 +18,8 @@
                 </div>
                 <div class="col-5 align-self-center">
                     <div class="float-right">
-                        <a href="{{ route('dashboard') }}" class="btn btn-sm btn-secondary font-weight-medium"><i class="fa fa-arrow-left mr-1"></i>
+                        <a href="{{ route('dashboard') }}" class="btn btn-sm btn-secondary font-weight-medium"><i
+                                class="fa fa-arrow-left mr-1"></i>
                             Kembali</a>
                     </div>
                 </div>
@@ -163,7 +164,8 @@
                             <div class="col-md-12">
                                 <div class="form-group mb-4 mt-2">
                                     <label
-                                        class="form-label text-dark font-weight-medium border-top pt-4 d-block w-100">Upload Jobsheet<span class="text-danger">*</span></label>
+                                        class="form-label text-dark font-weight-medium border-top pt-4 d-block w-100">Upload
+                                        Jobsheet<span class="text-danger">*</span></label>
 
                                     {{-- Drag & Drop Area untuk PDF --}}
                                     <div class="drag-drop-zone custom-radius mt-2" id="dragDropZone">
@@ -254,6 +256,7 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     {{-- Flatpickr JS --}}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
@@ -360,6 +363,15 @@
                 previewContainer.classList.add('d-none');
                 dropZone.classList.remove('d-none');
             });
+
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Jadwal Bentrok!',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#d33'
+                });
+            @endif
         });
     </script>
 @endpush

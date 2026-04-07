@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Laboratorium;
+use App\Models\PengajuanPraktikum;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -24,15 +26,32 @@ class LaboratoriumController extends Controller
             ->of($lab)
             ->addIndexColumn()
             ->addColumn('foto', function ($lab) {
-                // Logika foto persis seperti Dosen dan Pengguna
                 $url = $lab->foto && Storage::disk('public')->exists($lab->foto)
                     ? asset('storage/' . $lab->foto)
-                    : asset('master/assets/images/placeholder-lab.jpg'); // Pastikan punya placeholder
+                    : asset('master/assets/images/placeholder-lab.jpg');
                 return '<img src="' . $url . '" alt="foto" class="rounded" width="60" height="40" style="object-fit: cover;">';
             })
             ->addColumn('status_badge', function ($lab) {
-                if ($lab->status == 'Aktif') return '<span class="badge bg-success text-white px-2 py-1">Aktif</span>';
-                return '<span class="badge bg-danger text-white px-2 py-1">Nonaktif</span>';
+                // Jika status master dimatikan (under maintenance, dll)
+                if ($lab->status == 'Nonaktif') {
+                    return '<span class="badge bg-danger text-white px-2 py-1">Nonaktif (Tutup)</span>';
+                }
+
+                // Cek status REAL-TIME apakah sedang dipakai berdasarkan jadwal yang Disetujui
+                $now = Carbon::now();
+                $sedangDipakai = PengajuanPraktikum::where('id_lab', $lab->id_lab)
+                    ->where('tanggal', $now->toDateString())
+                    ->where('jam_mulai', '<=', $now->toTimeString())
+                    ->where('jam_selesai', '>=', $now->toTimeString())
+                    ->where('status', 'Disetujui')
+                    ->exists();
+
+                if ($sedangDipakai) {
+                    return '<span class="badge bg-warning text-dark px-2 py-1"><i class="fas fa-spinner fa-spin mr-1"></i> Sedang Digunakan</span>';
+                }
+
+                // Jika master Aktif dan tidak ada jadwal yang bentrok saat ini
+                return '<span class="badge bg-success text-white px-2 py-1">Tersedia (Aktif)</span>';
             })
             ->addColumn('aksi', function ($lab) {
                 return '
@@ -94,7 +113,26 @@ class LaboratoriumController extends Controller
     public function show($id)
     {
         $lab = Laboratorium::findOrFail($id);
-        return view('super_admin.lab.show', compact('lab'));
+
+        $urlFoto = $lab->foto && Storage::disk('public')->exists($lab->foto)
+            ? asset('storage/' . $lab->foto)
+            : 'https://placehold.co/600x400/eeeeee/999999?text=Tidak+Ada+Foto';
+
+        // LOGIKA PENGECEKAN REAL-TIME DIPERBAIKI
+        $now = Carbon::now();
+        $currentTime = $now->format('H:i'); // Hanya ambil Jam:Menit
+
+        $sedangDipakai = PengajuanPraktikum::where('id_lab', $lab->id_lab)
+            ->whereDate('tanggal', $now->toDateString())
+            ->where('status', 'Disetujui')
+            ->where(function ($query) use ($currentTime) {
+                // Memastikan waktu saat ini berada di TENGAN jam_mulai dan jam_selesai
+                $query->whereTime('jam_mulai', '<=', $currentTime)
+                    ->whereTime('jam_selesai', '>=', $currentTime);
+            })
+            ->exists();
+
+        return view('super_admin.lab.show', compact('lab', 'urlFoto', 'sedangDipakai'));
     }
 
     public function edit($id)

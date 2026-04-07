@@ -14,40 +14,29 @@ use Illuminate\Support\Facades\Storage;
 
 class PengajuanPraktikumController extends Controller
 {
-    /**
-     * =================================================================
-     * HELPER METHOD: Membuat Smart ID berdasarkan data relasi Kategori
-     * =================================================================
-     */
     private function generateSmartId($kategori_nama, $created_at, $lab_kode, $id_pengajuan)
     {
-        // 1. Buat singkatan otomatis dari Nama Kategori
         $namaKategori = $kategori_nama ?: 'UMUM';
         $words = explode(' ', $namaKategori);
         $prefix = '';
 
         if (count($words) > 1) {
-            // Jika lebih dari 1 kata, ambil huruf pertama setiap kata
             foreach ($words as $word) {
-                // Abaikan kata hubung
                 if (!in_array(strtolower($word), ['ke', 'dan', 'di', 'pada', 'kepada', 'untuk'])) {
                     $prefix .= strtoupper(substr($word, 0, 1));
                 }
             }
-            $prefix = substr($prefix, 0, 4); // Maksimal 4 huruf
+            $prefix = substr($prefix, 0, 4);
         } else {
-            // Jika 1 kata, ambil 3 huruf pertama
             $prefix = strtoupper(substr($namaKategori, 0, 3));
         }
 
         if (empty($prefix)) $prefix = 'REQ';
 
-        // 2. Format Elemen Lainnya
         $tahunBulan = Carbon::parse($created_at)->format('Ym');
         $kodeLab    = $lab_kode ?: 'NOLAB';
         $idPad      = str_pad($id_pengajuan, 4, '0', STR_PAD_LEFT);
 
-        // Format File
         return "{$prefix}/{$tahunBulan}/{$kodeLab}/{$idPad}";
     }
 
@@ -67,7 +56,6 @@ class PengajuanPraktikumController extends Controller
         return datatables()
             ->of($query)
             ->addColumn('nomor_registrasi', function ($row) {
-                // Panggil Helper Generator Smart ID
                 return $this->generateSmartId(
                     $row->kategori->nama_kategori ?? null,
                     $row->created_at,
@@ -157,33 +145,63 @@ class PengajuanPraktikumController extends Controller
             'jam_selesai.after'       => 'Jam selesai harus lebih besar dari jam mulai.'
         ]);
 
+        $tanggal = $request->tanggal;
+        $jamMulai = $request->jam_mulai;
+        $jamSelesai = $request->jam_selesai;
+        $idLab = $request->id_lab;
+        $userId = Auth::id();
+
+        // =========================================================================
+        // LOGIKA 1: Cek apakah Dosen ini sudah ada pengajuan di waktu yang sama
+        // =========================================================================
+        $cekDiriSendiri = PengajuanPraktikum::where('id_users', $userId)
+            ->where('tanggal', $tanggal)
+            ->whereNotIn('status', ['Ditolak Kaprodi', 'Ditolak Super Admin'])
+            ->where(function ($query) use ($jamMulai, $jamSelesai) {
+                // Rumus Overlap Waktu: (StartA < EndB) AND (EndA > StartB)
+                $query->where('jam_mulai', '<', $jamSelesai)
+                    ->where('jam_selesai', '>', $jamMulai);
+            })->first();
+
+        if ($cekDiriSendiri) {
+            return redirect()->back()->with('error', 'Gagal! Anda sudah memiliki jadwal pengajuan lain pada tanggal dan rentang waktu yang berbenturan dengan ini.')->withInput();
+        }
+
+        // =========================================================================
+        // LOGIKA 2: Cek apakah Lab sudah dibooking/diajukan orang lain di waktu tsb
+        // =========================================================================
+        $cekLabBentrok = PengajuanPraktikum::where('id_lab', $idLab)
+            ->where('tanggal', $tanggal)
+            ->whereNotIn('status', ['Ditolak Kaprodi', 'Ditolak Super Admin'])
+            ->where(function ($query) use ($jamMulai, $jamSelesai) {
+                $query->where('jam_mulai', '<', $jamSelesai)
+                    ->where('jam_selesai', '>', $jamMulai);
+            })->first();
+
+        if ($cekLabBentrok) {
+            $statusBentrok = $cekLabBentrok->status == 'Disetujui' ? 'sudah disetujui (dibooking)' : 'sedang dalam proses pengajuan';
+            return redirect()->back()->with('error', "Gagal! Laboratorium tersebut {$statusBentrok} oleh dosen lain pada rentang waktu yang Anda pilih. Silakan pilih jam atau lab lain.")->withInput();
+        }
+
         try {
             $path = null;
             if ($request->hasFile('jobsheet')) {
                 $file = $request->file('jobsheet');
-
-                // Ambil kode mata kuliah untuk nama file
                 $makul = MataKuliah::find($request->id_makul);
                 $kodeMakul = $makul ? strtoupper($makul->kode) : 'UMUM';
-
-                // Format tanggal saat ini (Contoh: 20260404)
                 $dateStr = Carbon::now()->format('Ymd');
-
-                // Rangkai nama file profesional: Jobsheet_TIF101_20260404_1712282000.pdf
                 $fileName = "Jobsheet_{$kodeMakul}_{$dateStr}_" . time() . "." . $file->getClientOriginalExtension();
-
-                // Gunakan storeAs() untuk menyimpan dengan nama kustom
                 $path = $file->storeAs('pengajuan/jobsheets', $fileName, 'public');
             }
 
             PengajuanPraktikum::create([
-                'id_users'    => Auth::id(),
+                'id_users'    => $userId,
                 'id_kategori' => $request->id_kategori,
-                'id_lab'      => $request->id_lab,
+                'id_lab'      => $idLab,
                 'id_makul'    => $request->id_makul,
-                'tanggal'     => $request->tanggal,
-                'jam_mulai'   => $request->jam_mulai,
-                'jam_selesai' => $request->jam_selesai,
+                'tanggal'     => $tanggal,
+                'jam_mulai'   => $jamMulai,
+                'jam_selesai' => $jamSelesai,
                 'jobsheet'    => $path,
                 'status'      => 'Menunggu Kaprodi',
                 'catatan'     => null
@@ -201,12 +219,10 @@ class PengajuanPraktikumController extends Controller
         $pengajuan = PengajuanPraktikum::with(['user.dosen', 'lab', 'makul', 'kategori'])->findOrFail($id);
         $user = Auth::user();
 
-        // Cek Izin Akses Dosen
         if ($user->role == 'Dosen' && $pengajuan->id_users != $user->id) {
             abort(403, 'Anda tidak diizinkan melihat detail pengajuan dosen lain.');
         }
 
-        // 1. Pembuatan Smart ID menggunakan Helper Method
         $nomorReg = $this->generateSmartId(
             $pengajuan->kategori->nama_kategori ?? null,
             $pengajuan->created_at,
@@ -214,7 +230,6 @@ class PengajuanPraktikumController extends Controller
             $pengajuan->id_pengajuan
         );
 
-        // 2. Data String Formatting untuk View
         $isOwner   = $user->id == $pengajuan->id_users;
         $statusDB  = $pengajuan->status;
         $namaDosen = $pengajuan->user->dosen->nama ?? $pengajuan->user->username ?? 'Unknown';
@@ -224,13 +239,11 @@ class PengajuanPraktikumController extends Controller
         $waktuPrak = substr($pengajuan->jam_mulai, 0, 5) . ' - ' . substr($pengajuan->jam_selesai, 0, 5) . ' WIB';
         $tglDibuat = Carbon::parse($pengajuan->created_at)->translatedFormat('d F Y, H:i');
 
-        // 3. Hak Akses Review
         $canReviewKaprodi = $user->role == 'Kaprodi' && $statusDB == 'Menunggu Kaprodi';
         $canReviewAdmin   = $user->role == 'Super Admin' && $statusDB == 'Menunggu Super Admin';
         $canReview        = $canReviewKaprodi || $canReviewAdmin;
         $roleTipe         = $canReviewKaprodi ? 'kaprodi' : 'admin';
 
-        // 4. Mapping Tampilan Status (Warna & Icon)
         $statusConfig = [
             'Menunggu Kaprodi'     => ['label' => 'Menunggu Verifikasi Kaprodi', 'color' => 'warning', 'icon' => 'clock'],
             'Menunggu Super Admin' => ['label' => 'Menunggu Finalisasi Super Admin', 'color' => 'primary', 'icon' => 'loader'],
@@ -238,9 +251,7 @@ class PengajuanPraktikumController extends Controller
         ];
         $uiStatus = $statusConfig[$statusDB] ?? ['label' => 'Ditolak', 'color' => 'danger', 'icon' => 'x'];
 
-        // 5. Logika Indikator Timeline
         $tl_1 = 'done';
-
         $tl_2 = 'pending';
         if (in_array($statusDB, ['Menunggu Super Admin', 'Disetujui', 'Ditolak Super Admin'])) {
             $tl_2 = 'done';
@@ -259,7 +270,6 @@ class PengajuanPraktikumController extends Controller
             $tl_3 = 'active';
         }
 
-        // Kirim semua data yang sudah matang ke View
         return view('pengajuan.show', compact(
             'pengajuan',
             'isOwner',

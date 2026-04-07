@@ -18,8 +18,7 @@
                 </div>
                 <div class="col-5 align-self-center">
                     <div class="customize-input float-right">
-                        <a href="{{ route('lab.create') }}"
-                            class="btn btn-sm btn-info border-0">
+                        <a href="{{ route('lab.create') }}" class="btn btn-sm btn-info border-0 shadow-sm">
                             <i class="fas fa-plus"></i> Tambah Laboratorium
                         </a>
                     </div>
@@ -30,7 +29,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
-                    <div class="card">
+                    <div class="card shadow-sm border-0">
                         <div class="card-body">
                             <h4 class="card-title">Daftar Laboratorium</h4>
                             <h6 class="card-subtitle mb-4">Manajemen fasilitas laboratorium yang tersedia.</h6>
@@ -40,12 +39,12 @@
                                     <thead>
                                         <tr>
                                             <th style="width: 5%">No</th>
-                                            <th style="width: 10%">Foto</th>
+                                            <th style="width: 10%" class="text-center">Foto</th>
                                             <th>Nama Laboratorium</th>
                                             <th style="width: 15%">Kode</th>
                                             <th style="width: 10%" class="text-center">Kapasitas</th>
-                                            <th style="width: 10%" class="text-center">Status</th>
-                                            <th style="width: 15%" class="text-center"><i class="fas fa-cog"></i></th>
+                                            <th style="width: 15%" class="text-center">Status</th>
+                                            <th style="width: 10%" class="text-center"><i class="fas fa-cog"></i></th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -103,7 +102,7 @@
                         searchable: false,
                         sortable: false,
                         className: 'text-center'
-                    },
+                    }
                 ]
             });
 
@@ -154,10 +153,7 @@
                                 text: response.message,
                                 icon: 'success',
                                 showConfirmButton: false,
-                                timer: 1500,
-                                customClass: {
-                                    popup: 'custom-radius'
-                                }
+                                timer: 1500
                             });
                         })
                         .fail((jqXHR) => {
@@ -167,10 +163,7 @@
                             Swal.fire({
                                 title: 'Gagal!',
                                 text: errorMessage,
-                                icon: 'error',
-                                customClass: {
-                                    popup: 'custom-radius'
-                                }
+                                icon: 'error'
                             });
                         });
                 }

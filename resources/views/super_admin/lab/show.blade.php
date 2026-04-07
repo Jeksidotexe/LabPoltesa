@@ -36,12 +36,7 @@
                 {{-- Sisi Kiri: Foto Lab --}}
                 <div class="col-lg-6 col-md-12 mb-3 mb-lg-0">
                     <div class="bg-white p-2 border h-100">
-                        @php
-                            $urlFoto =
-                                $lab->foto && Storage::disk('public')->exists($lab->foto)
-                                    ? asset('storage/' . $lab->foto)
-                                    : asset('images/default.jpg'); // Sesuaikan placeholder
-                        @endphp
+                        {{-- Variabel $urlFoto diproses murni di Controller --}}
                         <img src="{{ $urlFoto }}" alt="Foto {{ $lab->nama }}" class="w-100 h-100"
                             style="object-fit: cover; min-height: 280px; max-height: 350px;">
                     </div>
@@ -53,12 +48,20 @@
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span
                                 class="text-muted font-12 font-weight-medium tracking-wider text-uppercase">{{ $lab->kode }}</span>
-                            @if ($lab->status == 'Aktif')
+
+                            {{-- LOGIKA STATUS BADGE REAL-TIME --}}
+                            @if ($lab->status == 'Nonaktif')
+                                <span class="badge bg-light-danger text-danger font-11 font-weight-bold px-3 py-1">Nonaktif
+                                    (Tutup)</span>
+                            @elseif ($sedangDipakai)
                                 <span
-                                    class="badge bg-light-success text-success font-11 font-weight-bold">Beroperasi</span>
+                                    class="badge bg-light-warning text-warning font-11 font-weight-bold px-3 py-1 border border-warning">
+                                    <i class="fas fa-spinner fa-spin mr-1"></i> Sedang Digunakan
+                                </span>
                             @else
                                 <span
-                                    class="badge bg-light-danger text-danger font-11 font-weight-bold">Nonaktif</span>
+                                    class="badge bg-light-success text-success font-11 font-weight-bold px-3 py-1">Tersedia
+                                    (Aktif)</span>
                             @endif
                         </div>
 
@@ -84,7 +87,6 @@
                             </div>
                         </div>
 
-                        {{-- Metadata kecil di bawah --}}
                         <div class="mt-4 pt-3 border-top border-light">
                             <small class="text-muted font-11">Terakhir diperbarui:
                                 {{ $lab->updated_at ? $lab->updated_at->isoFormat('D MMMM YYYY, HH:mm') : '-' }}</small>
@@ -126,7 +128,7 @@
                             <div class="col-6 pr-2 mb-2 d-flex">
                                 <div
                                     class="bg-light-flat w-100 p-3 text-center d-flex flex-column justify-content-center align-items-center">
-                                    <i class="fas fa-tools text-muted mb-2 font-16"></i>
+                                    <i class="fas fa-wrench text-muted mb-2 font-16"></i>
                                     <h2 class="m-0 font-weight-bold text-dark font-24">
                                         {{ $lab->alat ? $lab->alat->count() : 0 }}</h2>
                                     <small
@@ -163,7 +165,6 @@
             border-color: #f1f4f6 !important;
         }
 
-        /* Tipografi & Spacing */
         .tracking-wider {
             letter-spacing: 0.8px;
         }
@@ -172,7 +173,6 @@
             font-weight: 600;
         }
 
-        /* Tata letak tombol header yang clean */
         .btn-outline-secondary {
             color: #6c757d;
             border-color: #ced4da;
@@ -185,7 +185,6 @@
             border-color: #ced4da;
         }
 
-        /* Warna Badges Flatter (Tanpa Gradien/Shadow) */
         .bg-light-success {
             background-color: #e6f7ed !important;
             border: 1px solid #c3eccd;
@@ -204,13 +203,19 @@
             color: #c81e1e !important;
         }
 
-        /* Latar belakang datar untuk info inventaris */
+        .bg-light-warning {
+            background-color: #fff8e5 !important;
+        }
+
+        .text-warning {
+            color: #ffb22b !important;
+        }
+
         .bg-light-flat {
             background-color: #f7f9fb;
             border: 1px solid #eef1f4;
         }
 
-        /* Penyesuaian gambar agar rapi di mobile */
         @media (max-width: 991.98px) {
             .page-wrapper img {
                 border-radius: 6px 6px 0 0 !important;
@@ -222,7 +227,6 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            // Memastikan feather icons dirender dengan benar
             if (typeof feather !== 'undefined') {
                 feather.replace();
             }

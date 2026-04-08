@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Laboratorium;
 use App\Models\PengajuanPraktikum;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,7 +15,19 @@ class DashboardController extends Controller
         $role = Auth::user()->role;
 
         if ($role == 'Super Admin') {
-            return view('super_admin.index');
+
+            // --- STATISTIK KHUSUS SUPER ADMIN ---
+            $total_pengguna = User::count() ?? 0;
+            $total_dosen = User::where('role', 'Dosen')->count() ?? 0;
+            $lab_aktif = Laboratorium::where('status', 'Aktif')->count() ?? 0;
+            $antrean_verif = PengajuanPraktikum::where('status', 'Menunggu Super Admin')->count() ?? 0;
+
+            return view('super_admin.index', compact(
+                'total_pengguna',
+                'total_dosen',
+                'lab_aktif',
+                'antrean_verif'
+            ));
         } elseif ($role == 'Admin') {
             return view('admin.index');
         } elseif ($role == 'Dosen') {
@@ -27,7 +41,12 @@ class DashboardController extends Controller
             $disetujui = PengajuanPraktikum::where('status', 'Disetujui')->count();
             $ditolak   = PengajuanPraktikum::where('status', 'like', '%Ditolak%')->count();
 
-            return view('kajur.index', compact('total', 'proses', 'disetujui', 'ditolak'));
+            return view('kajur.index', compact(
+                'total',
+                'proses',
+                'disetujui',
+                'ditolak'
+            ));
         } else {
             abort(403, 'Role tidak dikenali.');
         }

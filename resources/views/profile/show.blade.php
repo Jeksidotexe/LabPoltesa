@@ -115,7 +115,7 @@
                                         <small class="text-muted d-block font-12 font-weight-medium">Akun Dibuat
                                             Pada</small>
                                         <span
-                                            class="text-dark font-weight-bold font-14">{{ \Carbon\Carbon::parse($user->created_at)->translatedFormat('d M Y') }}</span>
+                                            class="text-dark font-weight-bold font-14">{{ \Carbon\Carbon::parse($user->created_at)->translatedFormat('d F Y') }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -124,7 +124,7 @@
                             <div class="w-100">
                                 <a href="{{ route('profile.edit') }}"
                                     class="btn btn-sm btn-primary btn-block font-weight-bold">
-                                    <i data-feather="edit-2" class="mr-2" style="width: 16px;"></i> Edit Profil Saya
+                                    <i data-feather="edit-2" class="mr-2" style="width: 16px;"></i> Edit Profil
                                 </a>
                             </div>
                         </div>

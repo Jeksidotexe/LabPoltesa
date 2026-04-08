@@ -17,7 +17,7 @@
                     </nav>
                 </div>
                 <div class="col-md-5 col-12 mt-3 mt-md-0 text-md-right">
-                    <a href="{{ route('dosen.index') }}" class="btn btn-sm btn-dark shadow-sm">
+                    <a href="{{ route('dosen.index') }}" class="btn btn-sm btn-secondary font-weight-medium">
                         <i class="fa fa-arrow-left mr-2"></i> Kembali
                     </a>
                 </div>
@@ -78,8 +78,7 @@
                                         <i data-feather="phone" style="width: 16px;"></i>
                                     </div>
                                     <div>
-                                        <small class="text-muted d-block font-12 font-weight-medium">No. Telepon /
-                                            WA</small>
+                                        <small class="text-muted d-block font-12 font-weight-medium">No. Telepon</small>
                                         <span class="text-dark font-weight-bold font-14">{{ $dosen->telepon }}</span>
                                     </div>
                                 </div>
@@ -91,7 +90,7 @@
                                     <div>
                                         <small class="text-muted d-block font-12 font-weight-medium">Terdaftar Sejak</small>
                                         <span
-                                            class="text-dark font-weight-bold font-14">{{ \Carbon\Carbon::parse($dosen->created_at)->translatedFormat('d M Y') }}</span>
+                                            class="text-dark font-weight-bold font-14">{{ \Carbon\Carbon::parse($dosen->created_at)->translatedFormat('d F Y') }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -99,7 +98,7 @@
                             {{-- Tombol Edit Profil --}}
                             <div class="w-100">
                                 <a href="{{ route('dosen.edit', $dosen->id_dosen) }}"
-                                    class="btn btn-sm btn-primary btn-block py-2 font-weight-bold">
+                                    class="btn btn-sm btn-primary btn-block font-weight-bold">
                                     <i data-feather="edit-2" class="mr-2" style="width: 16px;"></i> Edit Profil
                                 </a>
                             </div>

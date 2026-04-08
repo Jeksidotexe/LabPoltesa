@@ -32,11 +32,6 @@
             font-weight: normal;
         }
 
-        .meta-info {
-            margin-bottom: 15px;
-            font-size: 12px;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -53,28 +48,26 @@
         td {
             padding: 8px;
             text-align: left;
+            vertical-align: middle;
         }
 
         th {
             background-color: #f2f2f2 !important;
-            /* Terlihat saat print berwarna */
             -webkit-print-color-adjust: exact;
             text-align: center;
+            font-weight: bold;
         }
 
         .text-center {
             text-align: center;
         }
 
-        .status-badge {
-            font-weight: bold;
-        }
-
         /* Pengaturan Kertas Print */
         @media print {
             @page {
                 margin: 1.5cm;
-                size: A4 landscape;
+                size: A4 portrait;
+                /* Diubah ke portrait karena kolom lebih sedikit */
             }
 
             body {
@@ -87,41 +80,45 @@
 <body onload="window.print()">
 
     <div class="header">
-        <h2>REKAPITULASI KEGIATAN LABORATORIUM</h2>
-        <h4>Manajemen Laboratorium (LabPoltesa)</h4>
-    </div>
-
-    <div class="meta-info">
-        <strong>Tanggal Dicetak:</strong> {{ \Carbon\Carbon::now()->translatedFormat('d F Y H:i') }} WIB <br>
-        <strong>Dicetak Oleh:</strong> {{ auth()->user()->username }}
+        <h4 style="font-weight: 900;">REKAPITULASI KEGIATAN PRAKTIKUM</h4>
+        <h4 style="font-weight: 900;">LABORATORIUM</h4>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th width="3%">No</th>
-                <th width="15%">Tanggal Pelaksanaan</th>
-                <th width="12%">Waktu (WIB)</th>
-                <th width="20%">Laboratorium</th>
+                <th width="1%">No</th>
+                <th width="10%">Tanggal Pelaksanaan</th>
                 <th width="20%">Mata Kuliah</th>
-                <th width="18%">Dosen Pengampu</th>
+                <th width="15%">Prodi</th>
+                <th width="10%">Waktu Pelaksanaan</th>
             </tr>
         </thead>
         <tbody>
             @forelse($dataRekap as $index => $row)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ \Carbon\Carbon::parse($row->tanggal)->translatedFormat('d F Y') }}</td>
-                    <td class="text-center">{{ substr($row->jam_mulai, 0, 5) }} - {{ substr($row->jam_selesai, 0, 5) }}
-                    </td>
-                    <td>{{ $row->lab ? $row->lab->nama : '-' }}</td>
+
+                    {{-- Format Tanggal Lengkap dengan Hari --}}
+                    <td>{{ \Carbon\Carbon::parse($row->tanggal)->translatedFormat('l, d F Y') }}</td>
+
+                    {{-- Mata Kuliah --}}
                     <td>{{ $row->makul ? $row->makul->nama : '-' }}</td>
-                    <td>{{ $row->user && $row->user->dosen ? $row->user->dosen->nama : ($row->user ? $row->user->username : '-') }}
+
+                    {{-- Prodi --}}
+                    <td class="text-center">
+                        {{ $row->makul && $row->makul->prodi ? $row->makul->prodi->nama_prodi : '-' }}
+                    </td>
+
+                    {{-- Waktu Pelaksanaan --}}
+                    <td class="text-center">
+                        {{ substr($row->jam_mulai, 0, 5) }} - {{ substr($row->jam_selesai, 0, 5) }} WIB
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center">Belum ada data kegiatan praktikum.</td>
+                    <td colspan="6" class="text-center" style="padding: 15px;">Belum ada data kegiatan praktikum.
+                    </td>
                 </tr>
             @endforelse
         </tbody>

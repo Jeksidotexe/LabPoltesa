@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Alat;
 use App\Models\Laboratorium;
 use App\Models\PengajuanPraktikum;
 use App\Models\User;
@@ -29,7 +30,18 @@ class DashboardController extends Controller
                 'antrean_verif'
             ));
         } elseif ($role == 'Admin') {
-            return view('admin.index');
+
+            // --- STATISTIK KHUSUS ADMIN ---
+            $total_jenis_alat  = Alat::count() ?? 0;
+            $total_unit_barang = Alat::sum('jumlah') ?? 0;
+            $berita_acara      = 0;
+
+            return view('admin.index', compact(
+                'total_jenis_alat',
+                'total_unit_barang',
+                'berita_acara'
+            ));
+
         } elseif ($role == 'Dosen') {
             return view('dosen.index');
         } elseif ($role == 'Kaprodi') {

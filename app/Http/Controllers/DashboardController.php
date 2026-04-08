@@ -21,7 +21,13 @@ class DashboardController extends Controller
         } elseif ($role == 'Kaprodi') {
             return view('kaprodi.index');
         } elseif ($role == 'Kajur') {
-            return view('kajur.index');
+            // --- STATISTIK KHUSUS KAJUR ---
+            $total     = PengajuanPraktikum::count();
+            $proses    = PengajuanPraktikum::whereIn('status', ['Menunggu Kaprodi', 'Menunggu Super Admin'])->count();
+            $disetujui = PengajuanPraktikum::where('status', 'Disetujui')->count();
+            $ditolak   = PengajuanPraktikum::where('status', 'like', '%Ditolak%')->count();
+
+            return view('kajur.index', compact('total', 'proses', 'disetujui', 'ditolak'));
         } else {
             abort(403, 'Role tidak dikenali.');
         }
@@ -51,7 +57,6 @@ class DashboardController extends Controller
             ->addColumn('makul_nama', function ($row) {
                 return $row->makul ? $row->makul->nama : '-';
             })
-            // Format Tanggal Teks Biasa (Bahasa Indonesia)
             ->editColumn('tanggal', function ($row) {
                 return \Carbon\Carbon::parse($row->tanggal)->translatedFormat('d F Y');
             })
@@ -61,10 +66,23 @@ class DashboardController extends Controller
             ->editColumn('jam_selesai', function ($row) {
                 return substr($row->jam_selesai, 0, 5);
             })
-            ->addColumn('status_badge', function ($row) {
+            ->addColumn('status_badge', function ($row) use ($user) {
                 $status = $row->status;
 
-                // PENYEDERHANAAN STATUS UNTUK TAMPILAN DATATABLES
+                // --- TAMPILAN BADGE KHUSUS KAJUR ---
+                if ($user->role === 'Kajur') {
+                    if ($status == 'Menunggu Kaprodi') {
+                        return '<span class="badge bg-warning text-dark px-2 py-1"><i class="fas fa-clock mr-1"></i> Verifikasi Kaprodi</span>';
+                    } elseif ($status == 'Menunggu Super Admin') {
+                        return '<span class="badge bg-primary text-white px-2 py-1"><i class="fas fa-spinner fa-spin mr-1"></i> Verifikasi Super Admin</span>';
+                    } elseif ($status == 'Disetujui') {
+                        return '<span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-circle mr-1"></i> Telah Disetujui</span>';
+                    } elseif (str_contains($status, 'Ditolak')) {
+                        return '<span class="badge bg-danger text-white px-2 py-1"><i class="fas fa-ban mr-1"></i> ' . $status . '</span>';
+                    }
+                }
+
+                // --- TAMPILAN BADGE STANDAR UNTUK ROLE LAIN ---
                 if ($status == 'Disetujui') {
                     return '<span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-circle"></i> Telah Disetujui</span>';
                 } elseif (str_contains($status, 'Ditolak')) {
@@ -75,7 +93,6 @@ class DashboardController extends Controller
             })
             ->addColumn('aksi', function ($row) {
                 $btn = '<a href="' . route('pengajuan.show', $row->id_pengajuan) . '" class="btn btn-rounded btn-sm btn-info" title="Detail"><i class="fa fa-eye"></i></a>';
-
                 return '<div class="d-flex justify-content-center">' . $btn . '</div>';
             })
             ->rawColumns(['jam_mulai', 'jam_selesai', 'status_badge', 'aksi'])

@@ -15,7 +15,7 @@
                     </nav>
                 </div>
                 <div class="col-md-5 col-12 mt-3 mt-md-0 text-md-right">
-                    <a href="{{ route('dashboard') }}" class="btn btn-sm btn-dark shadow-sm">
+                    <a href="{{ route('dashboard') }}" class="btn btn-sm btn-secondary font-weight-medium">
                         <i class="fa fa-arrow-left mr-2"></i> Kembali
                     </a>
                 </div>
@@ -123,7 +123,7 @@
                             {{-- Tombol Edit Profil --}}
                             <div class="w-100">
                                 <a href="{{ route('profile.edit') }}"
-                                    class="btn btn-sm btn-primary btn-block py-2 font-weight-bold">
+                                    class="btn btn-sm btn-primary btn-block font-weight-bold">
                                     <i data-feather="edit-2" class="mr-2" style="width: 16px;"></i> Edit Profil Saya
                                 </a>
                             </div>

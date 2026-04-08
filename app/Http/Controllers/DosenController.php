@@ -95,7 +95,7 @@ class DosenController extends Controller
                     'role'     => 'Dosen',
                 ]);
 
-                // 2. Upload Foto Dosen (Logika persis PenggunaController)
+                // 2. Upload Foto Dosen
                 $fotoPath = null;
                 if ($request->hasFile('foto')) {
                     $fotoPath = $request->file('foto')->store('dosen/images', 'public');

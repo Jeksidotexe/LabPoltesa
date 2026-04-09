@@ -13,12 +13,21 @@ class AlatController extends Controller
 {
     public function index()
     {
-        return view('admin.alat.index');
+        // Panggil data lab
+        $lab = Laboratorium::orderBy('nama', 'asc')->get();
+        return view('admin.alat.index', compact('lab'));
     }
 
-    public function data()
+    public function data(Request $request)
     {
-        $alat = Alat::with('lab')->orderBy('id_alat', 'desc')->get();
+        $query = Alat::with('lab')->orderBy('id_alat', 'desc');
+
+        // Logika Filter Laboratorium
+        if ($request->has('id_lab') && $request->id_lab != '') {
+            $query->where('id_lab', $request->id_lab);
+        }
+
+        $alat = $query->get();
 
         return datatables()
             ->of($alat)

@@ -77,19 +77,19 @@
             {{-- MENU PINTASAN --}}
             <div class="row">
                 <div class="col-12">
-                    <div class="card border-0">
+                    <div class="card">
                         <div class="card-body text-center py-5">
                             <div class="mb-3">
                                 <div
                                     class="rounded-circle d-inline-flex justify-content-center align-items-center p-4">
-                                    <i data-feather="database" class="text-cyan" style="width: 40px; height: 40px;"></i>
+                                    <i data-feather="database" class="text-info" style="width: 40px; height: 40px;"></i>
                                 </div>
                             </div>
                             <h4 class="font-weight-bold text-dark">Pendataan Inventaris Aktif</h4>
                             <p class="text-muted mx-auto mb-4" style="max-width: 600px;">Gunakan menu Data Alat untuk
                                 menambah spesifikasi mesin dan SOP penggunaan terbaru.</p>
                             <a href="{{ route('alat.index') }}"
-                                class="btn btn-sm btn-cyan text-white px-5 font-weight-medium">
+                                class="btn btn-sm btn-info px-5 font-weight-medium">
                                 <i data-feather="arrow-right-circle" class="mr-2" style="width: 18px;"></i> Kelola Data Alat
                             </a>
                         </div>

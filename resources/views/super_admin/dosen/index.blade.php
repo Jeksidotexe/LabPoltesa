@@ -21,7 +21,7 @@
                 <div class="col-5 align-self-center">
                     <div class="customize-input float-right">
                         <a href="{{ route('dosen.create') }}"
-                            class="btn btn-sm btn-info border-0">
+                            class="btn btn-sm btn-primary">
                             <i class="fas fa-plus"></i> Tambah Dosen
                         </a>
                     </div>

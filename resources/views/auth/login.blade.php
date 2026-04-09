@@ -20,7 +20,7 @@
                             <div class="col-lg-12">
                                 <div class="form-group mb-3">
                                     <label class="text-dark font-weight-medium" for="username">
-                                        <i class="fas fa-user text-info mr-1"></i> Username
+                                        <i class="fas fa-user text-primary mr-1"></i> Username
                                     </label>
                                     <input class="form-control @error('username') is-invalid @enderror" type="text"
                                         id="username" name="username" value="{{ old('username') }}"
@@ -33,7 +33,7 @@
                             <div class="col-lg-12">
                                 <div class="form-group mb-3">
                                     <label class="text-dark font-weight-medium" for="password">
-                                        <i class="fas fa-lock text-info mr-1"></i> Password
+                                        <i class="fas fa-lock text-primary mr-1"></i> Password
                                     </label>
                                     <div class="position-relative">
                                         <input class="form-control @error('password') is-invalid @enderror" type="password"
@@ -50,13 +50,13 @@
                                 </div>
                             </div>
                             <div class="col-lg-12 text-center mt-3">
-                                <button type="submit" class="btn btn-block btn-info"
+                                <button type="submit" class="btn btn-block btn-primary"
                                     style="border-radius: 8px;">
                                     <i class="fas fa-sign-in-alt mr-1"></i> Masuk
                                 </button>
                             </div>
                             <div class="col-lg-12 text-center mt-4">
-                                Belum punya akun? <a href="#" class="text-info">Register</a>
+                                Belum punya akun? <a href="#" class="text-primary">Register</a>
                             </div>
                         </div>
                     </form>

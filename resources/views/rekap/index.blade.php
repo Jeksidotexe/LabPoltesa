@@ -18,7 +18,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-4 align-self-center text-right">
-                    <a href="{{ route('rekap.cetak') }}" target="_blank" class="btn btn-sm btn-success text-white">
+                    <a href="{{ route('rekap.cetak') }}" target="_blank" class="btn btn-sm btn-info">
                         <i class="fas fa-print mr-2"></i>Cetak Rekap
                     </a>
                 </div>

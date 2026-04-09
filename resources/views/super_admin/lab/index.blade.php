@@ -18,7 +18,7 @@
                 </div>
                 <div class="col-5 align-self-center">
                     <div class="customize-input float-right">
-                        <a href="{{ route('lab.create') }}" class="btn btn-sm btn-info border-0 shadow-sm">
+                        <a href="{{ route('lab.create') }}" class="btn btn-sm btn-primary">
                             <i class="fas fa-plus"></i> Tambah Laboratorium
                         </a>
                     </div>
@@ -29,7 +29,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
-                    <div class="card shadow-sm border-0">
+                    <div class="card">
                         <div class="card-body">
                             <h4 class="card-title">Daftar Laboratorium</h4>
                             <h6 class="card-subtitle mb-4">Manajemen fasilitas laboratorium yang tersedia.</h6>

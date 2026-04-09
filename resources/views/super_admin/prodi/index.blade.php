@@ -19,7 +19,7 @@
                 <div class="col-5 align-self-center">
                     <div class="customize-input float-right">
                         <a href="{{ route('prodi.create') }}"
-                            class="btn btn-sm btn-info border-0">
+                            class="btn btn-sm btn-primary">
                             <i class="fas fa-plus"></i> Tambah Prodi
                         </a>
                     </div>

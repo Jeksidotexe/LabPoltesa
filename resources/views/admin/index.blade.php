@@ -81,7 +81,7 @@
                         <div class="card-body text-center py-5">
                             <div class="mb-3">
                                 <div
-                                    class="bg-light-cyan rounded-circle d-inline-flex justify-content-center align-items-center p-4">
+                                    class="rounded-circle d-inline-flex justify-content-center align-items-center p-4">
                                     <i data-feather="database" class="text-cyan" style="width: 40px; height: 40px;"></i>
                                 </div>
                             </div>
@@ -89,9 +89,8 @@
                             <p class="text-muted mx-auto mb-4" style="max-width: 600px;">Gunakan menu Data Alat untuk
                                 menambah spesifikasi mesin dan SOP penggunaan terbaru.</p>
                             <a href="{{ route('alat.index') }}"
-                                class="btn btn-sm btn-cyan text-white px-5 btn-hover font-weight-medium">
-                                <i data-feather="arrow-right-circle" class="mr-2" style="width: 18px;"></i> Kelola Data
-                                Alat
+                                class="btn btn-sm btn-cyan text-white px-5 font-weight-medium">
+                                <i data-feather="arrow-right-circle" class="mr-2" style="width: 18px;"></i> Kelola Data Alat
                             </a>
                         </div>
                     </div>
@@ -103,25 +102,6 @@
     <style>
         .bg-gradient-cyan {
             background: linear-gradient(135deg, #22c6ab 0%, #17a2b8 100%) !important;
-        }
-
-        .bg-light-cyan {
-            background-color: rgba(34, 198, 171, 0.1) !important;
-        }
-
-        .text-cyan {
-            color: #22c6ab !important;
-        }
-
-        .btn-cyan {
-            background-color: #22c6ab;
-            border: none;
-        }
-
-        .btn-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(34, 198, 171, 0.3) !important;
-            color: #fff;
         }
 
         .relative-card {

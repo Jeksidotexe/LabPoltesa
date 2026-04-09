@@ -46,8 +46,7 @@
                                 </div>
                             </div>
 
-                            <div class="alert alert-info py-3 px-4 d-flex align-items-center border-0 shadow-sm mb-5"
-                                style="background-color: #e3f2fd;">
+                            <div class="alert alert-info py-3 px-4 d-flex align-items-center border-0 shadow-sm mb-5">
                                 <i class="fas fa-info-circle mr-3 fa-2x text-info"></i>
                                 <span class="text-dark"><strong>Penting:</strong> Sistem akan otomatis membuatkan akun login
                                     dengan <b>Username</b> dan <b>Password</b> menggunakan NIP dosen yang Anda
@@ -135,7 +134,7 @@
                                         </select>
                                     </div>
                                     <div class="col-md-4 form-group mb-4">
-                                        <label class="form-label text-dark font-weight-medium">No. Telepon / WhatsApp <span
+                                        <label class="form-label text-dark font-weight-medium">No. Telepon<span
                                                 class="text-danger">*</span></label>
                                         <input type="text"
                                             class="form-control @error('telepon') is-invalid @enderror"
@@ -230,7 +229,7 @@
                                                 style="max-height: 180px; object-fit: cover;">
                                             <div class="d-flex justify-content-center">
                                                 <button type="button"
-                                                    class="btn btn-sm btn-outline-primary rounded-pill px-3 mr-2"
+                                                    class="btn btn-sm btn-outline-info rounded-pill px-3 mr-2"
                                                     onclick="document.getElementById('foto').click()">
                                                     <i class="fas fa-sync-alt mr-1"></i> Ganti
                                                 </button>

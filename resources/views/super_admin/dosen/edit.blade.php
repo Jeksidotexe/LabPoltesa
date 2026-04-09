@@ -35,7 +35,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
-                    <div class="card custom-radius border-0">
+                    <div class="card">
                         <div class="card-body p-4 p-md-5">
 
                             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -47,8 +47,8 @@
                             </div>
 
                             <div
-                                class="alert alert-warning py-3 px-4 d-flex align-items-center border-0 shadow-sm mb-5">
-                                <i class="fas fa-exclamation-triangle mr-3 fa-2x"></i>
+                                class="alert alert-warning py-3 px-4 d-flex align-items-center mb-5">
+                                <i class="fas fa-exclamation-triangle mr-3 fa-2x text-warning"></i>
                                 <span class="text-dark"><strong>Peringatan:</strong> Jika Anda mengubah <b>NIP</b>, maka
                                     Username login dosen tersebut akan otomatis ikut tersinkronisasi/berubah.</span>
                             </div>
@@ -137,7 +137,7 @@
                                         </select>
                                     </div>
                                     <div class="col-md-4 form-group mb-4">
-                                        <label class="form-label text-dark font-weight-medium">No. Telepon / WhatsApp <span
+                                        <label class="form-label text-dark font-weight-medium">No. Telepon<span
                                                 class="text-danger">*</span></label>
                                         <input type="text"
                                             class="form-control @error('telepon') is-invalid @enderror"

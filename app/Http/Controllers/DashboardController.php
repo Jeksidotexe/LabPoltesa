@@ -32,21 +32,60 @@ class DashboardController extends Controller
         } elseif ($role == 'Admin') {
 
             // --- STATISTIK KHUSUS ADMIN ---
+            $total     = PengajuanPraktikum::count();
+            $proses    = PengajuanPraktikum::whereIn('status', ['Menunggu Kaprodi', 'Menunggu Super Admin'])->count();
+            $disetujui = PengajuanPraktikum::where('status', 'Disetujui')->count();
+            $ditolak   = PengajuanPraktikum::where('status', 'like', '%Ditolak%')->count();
+
             $total_jenis_alat  = Alat::count() ?? 0;
             $total_unit_barang = Alat::sum('jumlah') ?? 0;
             $berita_acara      = 0;
 
             return view('admin.index', compact(
+                'total',
+                'proses',
+                'disetujui',
+                'ditolak',
                 'total_jenis_alat',
                 'total_unit_barang',
                 'berita_acara'
             ));
-
         } elseif ($role == 'Dosen') {
-            return view('dosen.index');
+
+            // --- STATISTIK KHUSUS DOSEN ---
+            $user = Auth::user();
+            $namaTampil = $user->dosen?->nama ?? $user->username;
+
+            $total     = PengajuanPraktikum::count();
+            $disetujui = PengajuanPraktikum::where('status', 'Disetujui')->count();
+            $ditolak   = PengajuanPraktikum::where('status', 'like', '%Ditolak%')->count();
+
+            return view('dosen.index', compact(
+                'namaTampil',
+                'total',
+                'disetujui',
+                'ditolak'
+            ));
         } elseif ($role == 'Kaprodi') {
-            return view('kaprodi.index');
+
+            // --- STATISTIK KHUSUS KAPRODI ---
+            $user = Auth::user();
+            $namaTampil = $user->dosen?->nama ?? $user->username;
+
+            $total           = PengajuanPraktikum::count() ?? 0;
+            $disetujui       = PengajuanPraktikum::where('status', 'Disetujui')->count() ?? 0;
+            $ditolak         = PengajuanPraktikum::where('status', 'like', '%Ditolak%')->count() ?? 0;
+            $menunggu        = PengajuanPraktikum::where('status', 'Menunggu Kaprodi')->count() ?? 0;
+            return view('kaprodi.index', compact(
+                'namaTampil',
+                'total',
+                'disetujui',
+                'ditolak',
+                'menunggu'
+
+            ));
         } elseif ($role == 'Kajur') {
+
             // --- STATISTIK KHUSUS KAJUR ---
             $total     = PengajuanPraktikum::count();
             $proses    = PengajuanPraktikum::whereIn('status', ['Menunggu Kaprodi', 'Menunggu Super Admin'])->count();

@@ -2,24 +2,17 @@
 @section('title', 'Dashboard')
 @section('content')
     <div class="page-wrapper">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card bg-gradient-primary border-0 overflow-hidden relative-card">
-                        <div class="card-body p-4 p-md-5 text-white">
-                            <div class="row align-items-center relative-z">
-                                <div class="col-md-8">
-                                    <h2 class="font-weight-bold text-white mb-2">Selamat Datang, Super Admin!</h2>
-                                    <p class="mb-0 text-white-50" style="font-size: 1.1rem;">Pusat Kendali Utama Sistem
-                                        Informasi Manajemen Laboratorium (LabPoltesa). Pantau seluruh aktivitas dan
-                                        finalisasi jadwal dengan mudah.</p>
-                                </div>
-                            </div>
-                            <i data-feather="cpu" class="watermark-icon"></i>
-                        </div>
-                    </div>
+        <div class="page-breadcrumb">
+            <div class="row align-items-center">
+                <div class="col-md-12 col-12">
+                    <h4 class="page-title text-dark text-uppercase font-weight-bold mb-1">Dashboard Super Admin</h4>
+                    <p class="text-muted mb-0 font-14">Pusat Kendali Utama Sistem Manajemen Laboratorium. Pantau seluruh
+                        aktivitas dan
+                        finalisasi jadwal dengan mudah.</p>
                 </div>
             </div>
+        </div>
+        <div class="container-fluid">
 
             {{-- KARTU STATISTIK --}}
             <div class="card-group mb-4" style="border-radius: 10px; overflow: hidden;">
@@ -94,12 +87,14 @@
             {{-- TABEL DATA VERIFIKASI TAHAP 2 --}}
             <div class="row">
                 <div class="col-12">
-                    <div class="card border-0">
-                        <div class="card-body p-4 p-md-5">
+                    <div class="card">
+                        <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
                                 <div>
-                                    <h4 class="card-title text-dark font-weight-bold m-0"><i
-                                            class="fas fa-check-double text-success mr-2"></i>Finalisasi Jadwal (Tahap 2)
+                                    <h4 class="card-title text-dark font-weight-bold m-0">
+                                        <i data-feather="check-circle" class="text-success mr-2"
+                                            style="width:18px; height:18px;"></i>
+                                        Finalisasi Jadwal (Tahap 2)
                                     </h4>
                                     <p class="text-muted m-0 mt-1">Verifikasi ketersediaan ruang Lab untuk memastikan tidak
                                         ada jadwal yang bentrok.</p>
@@ -127,53 +122,6 @@
             </div>
         </div>
     </div>
-
-    <style>
-        .bg-gradient-primary {
-            background: linear-gradient(135deg, #5e72e4 0%, #825ee4 100%) !important;
-        }
-
-        .relative-card {
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        .relative-z {
-            position: relative;
-            z-index: 2;
-        }
-
-        .text-white-50 {
-            color: rgba(255, 255, 255, 0.8) !important;
-        }
-
-        .watermark-icon {
-            position: absolute;
-            right: 5%;
-            top: 50%;
-            transform: translateY(-50%) rotate(-15deg);
-            width: 140px;
-            height: 140px;
-            opacity: 0.15;
-            color: white;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* Penyesuaian desain Card Group */
-        .card-group {
-            border-radius: 10px;
-        }
-
-        .border-right {
-            border-right: 1px solid rgba(0, 0, 0, .08) !important;
-        }
-
-        .opacity-7 {
-            opacity: 0.7;
-        }
-    </style>
 @endsection
 
 @push('scripts')

@@ -2,25 +2,86 @@
 @section('title', 'Dashboard')
 @section('content')
     <div class="page-wrapper">
-        <div class="container-fluid pt-4">
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card bg-gradient-warning border-0 shadow-lg overflow-hidden relative-card">
-                        <div class="card-body p-4 p-md-5 text-white">
-                            <div class="row align-items-center relative-z">
-                                <div class="col-md-9">
-                                    <h2 class="font-weight-bold text-white mb-2">Selamat Datang, Kaprodi!</h2>
-                                    <p class="mb-0 text-white-50" style="font-size: 1.1rem;">Pusat Verifikasi Dokumen &
-                                        Kesesuaian Kurikulum Praktikum. Mohon tinjau Jobsheet yang diajukan oleh dosen
-                                        pengampu.</p>
-                                </div>
+        <div class="page-breadcrumb">
+            <div class="row align-items-center">
+                <div class="col-md-12 col-12">
+                    <h4 class="page-title text-dark text-uppercase font-weight-bold mb-1">Selamat Datang, {{ $namaTampil }}
+                    </h4>
+                    <p class="text-muted mb-0 font-14">Verifikasi Dokumen &
+                        Kesesuaian Kurikulum Praktikum.</p>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            {{-- KARTU STATISTIK --}}
+            <div class="card-group">
+
+                {{-- Card 1: Total Pengajuan --}}
+                <div class="card border-right">
+                    <div class="card-body p-4">
+                        <div class="d-flex d-lg-flex d-md-block align-items-center">
+                            <div>
+                                <h2 class="text-dark mb-1 font-weight-medium">{{ $total }}</h2>
+                                <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Total Pengajuan</h6>
                             </div>
-                            <i data-feather="file-text" class="watermark-icon"></i>
+                            <div class="ml-auto mt-md-3 mt-lg-0">
+                                <span class="opacity-7 text-primary"><i data-feather="file-text"
+                                        style="width: 24px; height: 24px;"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Card 2: Total Pengajuan Disetujui --}}
+                <div class="card border-right">
+                    <div class="card-body p-4">
+                        <div class="d-flex d-lg-flex d-md-block align-items-center">
+                            <div>
+                                <h2 class="text-dark mb-1 w-100 text-truncate font-weight-medium">{{ $disetujui }}</h2>
+                                <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Disetujui</h6>
+                            </div>
+                            <div class="ml-auto mt-md-3 mt-lg-0">
+                                <span class="opacity-7 text-success"><i data-feather="check-circle"
+                                        style="width: 24px; height: 24px;"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Card 3: Total Pengajuan Ditolak --}}
+                <div class="card border-right">
+                    <div class="card-body p-4">
+                        <div class="d-flex d-lg-flex d-md-block align-items-center">
+                            <div>
+                                <h2 class="text-dark mb-1 font-weight-medium">{{ $ditolak }}</h2>
+                                <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Ditolak</h6>
+                            </div>
+                            <div class="ml-auto mt-md-3 mt-lg-0">
+                                <span class="opacity-7 text-danger"><i data-feather="x-circle"
+                                        style="width: 24px; height: 24px;"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Card 4: Total Pengajuan Menunggu --}}
+                <div class="card">
+                    <div class="card-body p-4">
+                        <div class="d-flex d-lg-flex d-md-block align-items-center">
+                            <div>
+                                <h2 class="text-dark mb-1 font-weight-medium">{{ $menunggu }}</h2>
+                                <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Menunggu Verifikasi</h6>
+                            </div>
+                            <div class="ml-auto mt-md-3 mt-lg-0">
+                                <span class="opacity-7 text-info"><i data-feather="clock"
+                                        style="width: 24px; height: 24px;"></i></span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            {{-- TABEL PENGAJUAN --}}
             <div class="row">
                 <div class="col-12">
                     <div class="card">
@@ -35,8 +96,8 @@
                                 </div>
                             </div>
                             <div class="table-responsive">
-                                <table id="table-verif" class="table table-striped table-bordered w-100">
-                                    <thead>
+                                <table id="table-verif" class="table table-hover table-borderless w-100 font-14">
+                                    <thead class="bg-light">
                                         <tr>
                                             <th>Dosen Pengaju</th>
                                             <th>Laboratorium</th>

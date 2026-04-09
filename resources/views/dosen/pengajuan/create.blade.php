@@ -118,7 +118,7 @@
                                         <i class="far fa-calendar-alt position-absolute text-muted"
                                             style="right: 15px; top: 50%; transform: translateY(-50%);"></i>
                                     </div>
-                                    <small class="text-info mt-1 d-block"><i class="fas fa-info-circle"></i> Maks. 1 minggu
+                                    <small class="text-info mt-1 d-block"><i class="fas fa-info-circle"></i> Min. 7 Hari
                                         dari hari ini.</small>
                                     @error('tanggal')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -268,16 +268,14 @@
                 width: '100%'
             });
 
-            // Variable Min & Max Date dari Controller
+            // Variable Min Date dari Controller (Otomatis H+7)
             const minDate = "{{ $minDate }}";
-            const maxDate = "{{ $maxDate }}";
 
-            // Datepicker Flatpickr Init (Format Indonesia)
+            // Datepicker Flatpickr Init
             flatpickr(".datepicker", {
                 dateFormat: "Y-m-d",
                 locale: "id",
-                minDate: minDate,
-                maxDate: maxDate,
+                minDate: minDate, // Mengunci agar tanggal sebelum H+7 tidak bisa diklik
                 allowInput: true
             });
 

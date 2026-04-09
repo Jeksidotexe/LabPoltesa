@@ -122,60 +122,56 @@ class PengajuanPraktikumController extends Controller
             ? MataKuliah::where('id_prodi', $idProdi)->orderBy('nama', 'asc')->get()
             : MataKuliah::orderBy('nama', 'asc')->get();
 
-        $minDate = Carbon::now()->format('Y-m-d');
-        $maxDate = Carbon::now()->addDays(6)->format('Y-m-d');
+        // LOGIKA BARU: Minimal H+7 (Seminggu setelah hari ini)
+        $minDate = Carbon::now('Asia/Jakarta')->addDays(7)->format('Y-m-d');
 
-        return view('dosen.pengajuan.create', compact('kategori', 'lab', 'makul', 'minDate', 'maxDate'));
+        return view('dosen.pengajuan.create', compact('kategori', 'lab', 'makul', 'minDate'));
     }
 
     public function store(Request $request)
     {
-        $maxDate = Carbon::now()->addDays(6)->format('Y-m-d');
+        // LOGIKA BARU: Minimal H+7 untuk validasi backend agar tidak bisa di-bypass
+        $minDate = Carbon::now('Asia/Jakarta')->addDays(7)->format('Y-m-d');
 
         $request->validate([
             'id_kategori' => 'required|exists:kategori,id_kategori',
             'id_lab'      => 'required|exists:laboratorium,id_lab',
             'id_makul'    => 'required|exists:mata_kuliah,id_makul',
-            'tanggal'     => 'required|date|after_or_equal:today|before_or_equal:' . $maxDate,
+            'tanggal'     => 'required|date|after_or_equal:' . $minDate, // Validasi H+7
             'jam_mulai'   => 'required|date_format:H:i',
             'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
             'jobsheet'    => 'required|mimes:pdf|max:5120',
         ], [
-            'tanggal.before_or_equal' => 'Maksimal tanggal peminjaman adalah 1 minggu dari hari ini.',
+            'tanggal.after_or_equal'  => 'Tanggal praktikum minimal harus 7 hari (seminggu) setelah tanggal pengajuan.',
             'jam_selesai.after'       => 'Jam selesai harus lebih besar dari jam mulai.'
         ]);
 
         $tanggal = $request->tanggal;
-        $jamMulai = $request->jam_mulai;
-        $jamSelesai = $request->jam_selesai;
+        $jamMulai = substr($request->jam_mulai, 0, 5);
+        $jamSelesai = substr($request->jam_selesai, 0, 5);
         $idLab = $request->id_lab;
         $userId = Auth::id();
 
-        // =========================================================================
-        // LOGIKA 1: Cek apakah Dosen ini sudah ada pengajuan di waktu yang sama
-        // =========================================================================
+        // LOGIKA 1: Cek Diri Sendiri Bentrok
         $cekDiriSendiri = PengajuanPraktikum::where('id_users', $userId)
-            ->where('tanggal', $tanggal)
+            ->whereDate('tanggal', $tanggal)
             ->whereNotIn('status', ['Ditolak Kaprodi', 'Ditolak Super Admin'])
             ->where(function ($query) use ($jamMulai, $jamSelesai) {
-                // Rumus Overlap Waktu: (StartA < EndB) AND (EndA > StartB)
-                $query->where('jam_mulai', '<', $jamSelesai)
-                    ->where('jam_selesai', '>', $jamMulai);
+                $query->whereTime('jam_mulai', '<', $jamSelesai)
+                    ->whereTime('jam_selesai', '>', $jamMulai);
             })->first();
 
         if ($cekDiriSendiri) {
             return redirect()->back()->with('error', 'Gagal! Anda sudah memiliki jadwal pengajuan lain pada tanggal dan rentang waktu yang berbenturan dengan ini.')->withInput();
         }
 
-        // =========================================================================
-        // LOGIKA 2: Cek apakah Lab sudah dibooking/diajukan orang lain di waktu tsb
-        // =========================================================================
+        // LOGIKA 2: Cek Lab Bentrok dengan orang lain
         $cekLabBentrok = PengajuanPraktikum::where('id_lab', $idLab)
-            ->where('tanggal', $tanggal)
+            ->whereDate('tanggal', $tanggal)
             ->whereNotIn('status', ['Ditolak Kaprodi', 'Ditolak Super Admin'])
             ->where(function ($query) use ($jamMulai, $jamSelesai) {
-                $query->where('jam_mulai', '<', $jamSelesai)
-                    ->where('jam_selesai', '>', $jamMulai);
+                $query->whereTime('jam_mulai', '<', $jamSelesai)
+                    ->whereTime('jam_selesai', '>', $jamMulai);
             })->first();
 
         if ($cekLabBentrok) {

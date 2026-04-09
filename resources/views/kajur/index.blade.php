@@ -2,24 +2,15 @@
 @section('title', 'Dashboard')
 @section('content')
     <div class="page-wrapper">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card bg-gradient-purple border-0 shadow-sm overflow-hidden relative-card">
-                        <div class="card-body p-4 p-md-5 text-white">
-                            <div class="row align-items-center relative-z">
-                                <div class="col-md-9">
-                                    <h2 class="font-weight-bold text-white mb-2">Selamat Datang, Ketua Jurusan!</h2>
-                                    <p class="mb-0 text-white-50 font-15">Portal Executive Summary & Monitoring Laporan
-                                        Operasional Laboratorium secara komprehensif.</p>
-                                </div>
-                            </div>
-                            <i data-feather="activity" class="watermark-icon"></i>
-                        </div>
-                    </div>
+        <div class="page-breadcrumb">
+            <div class="row align-items-center">
+                <div class="col-md-12 col-12">
+                    <h4 class="page-title text-dark text-uppercase font-weight-bold mb-1">Dashboard Ketua Jurusan</h4>
+                    <p class="text-muted mb-0 font-14">Portal Executive Summary & Monitoring Operasional Laboratorium secara komprehensif.</p>
                 </div>
             </div>
-
+        </div>
+        <div class="container-fluid">
             {{-- STATISTIK SINGKAT --}}
             <div class="card-group mb-4">
                 <div class="card border-right">
@@ -75,22 +66,23 @@
                                 </h6>
                             </div>
                             <div class="ml-auto mt-md-3 mt-lg-0">
-                                <span class="opacity-7 text-danger"><i  data-feather="x-circle"></i></span>
+                                <span class="opacity-7 text-danger"><i data-feather="x-circle"></i></span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- TABEL MONITORING PUSAT --}}
+            {{-- TABEL MONITORING --}}
             <div class="row">
                 <div class="col-md-12">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body p-4 p-md-5">
                             <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
                                 <div>
-                                    <h4 class="font-weight-bold text-dark mb-1">Pusat Monitoring Peminjaman</h4>
-                                    <p class="text-muted font-13 mb-0">Pantau aktivitas pengajuan laboratorium oleh Dosen.</p>
+                                    <h4 class="font-weight-bold text-dark mb-1">Monitoring Peminjaman</h4>
+                                    <p class="text-muted font-13 mb-0">Pantau aktivitas pengajuan laboratorium oleh Dosen.
+                                    </p>
                                 </div>
                             </div>
 
@@ -104,7 +96,7 @@
                                             <th class="border-0">Mata Kuliah</th>
                                             <th class="border-0">Tanggal</th>
                                             <th class="text-center border-0">Waktu</th>
-                                            <th class="text-center border-0">Status Track</th>
+                                            <th class="text-center border-0">Status</th>
                                             <th class="text-center rounded-right border-0"><i class="fas fa-cog"></i></th>
                                         </tr>
                                     </thead>

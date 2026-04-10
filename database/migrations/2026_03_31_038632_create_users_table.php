@@ -16,11 +16,26 @@ return new class extends Migration
             $table->string('username');
             $table->string('password');
             $table->enum('role', ['Super Admin', 'Admin', 'Dosen', 'Kaprodi', 'Kajur']);
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('nip')->unique();
+            $table->string('nama', 100);
+            $table->string('gelar_depan', 20)->nullable();
+            $table->string('gelar_belakang', 20);
+            $table->date('tanggal_lahir');
+            $table->enum('jenis_kelamin', ['L', 'P']);
+            $table->unsignedBigInteger('id_prodi')->nullable();
+            $table->string('jabatan', 50);
+            $table->string('email', 100);
+            $table->string('telepon', 20);
+            $table->string('foto', 2048)->nullable();
+            $table->date('tanggal_bergabung');
+            $table->enum('status', ['Aktif', 'Nonaktif']);
+            // $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->foreignId('current_team_id')->nullable();
-            $table->string('profile_photo_path', 2048)->nullable();
+            // $table->string('profile_photo_path', 2048)->nullable();
             $table->timestamps();
+
+            $table->foreign('id_prodi')->references('id_prodi')->on('program_studi');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

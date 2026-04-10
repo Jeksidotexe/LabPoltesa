@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\AlatController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\DosenController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\LaboratoriumController;
 use App\Http\Controllers\LoginController;
@@ -38,9 +37,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:Super Admin'])->group(function () {
         Route::get('/pengguna/data', [PenggunaController::class, 'data'])->name('pengguna.data');
         Route::resource('/pengguna', PenggunaController::class);
-
-        Route::get('/dosen/data', [DosenController::class, 'data'])->name('dosen.data');
-        Route::resource('/dosen', DosenController::class);
 
         Route::get('/prodi/data', [ProgramStudiController::class, 'data'])->name('prodi.data');
         Route::resource('/prodi', ProgramStudiController::class);

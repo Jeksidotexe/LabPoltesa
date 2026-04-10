@@ -15,9 +15,9 @@ class ProgramStudi extends Model
         'tanggal_berdiri'
     ];
 
-    public function dosen()
+    public function users()
     {
-        return $this->hasMany(Dosen::class, 'id_prodi', 'id_prodi');
+        return $this->hasMany(User::class, 'id_prodi', 'id_prodi');
     }
 
     public function makul()

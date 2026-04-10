@@ -29,7 +29,20 @@ class User extends Authenticatable
     protected $fillable = [
         'username',
         'password',
-        'role'
+        'role',
+        'nip',
+        'nama',
+        'gelar_depan',
+        'gelar_belakang',
+        'tanggal_lahir',
+        'jenis_kelamin',
+        'id_prodi',
+        'jabatan',
+        'email',
+        'telepon',
+        'foto',
+        'tanggal_bergabung',
+        'status'
     ];
 
     /**
@@ -66,9 +79,9 @@ class User extends Authenticatable
         ];
     }
 
-    public function dosen()
+    public function prodi()
     {
-        return $this->hasOne(Dosen::class, 'id_users', 'id');
+        return $this->belongsTo(ProgramStudi::class, 'id_prodi', 'id_prodi');
     }
 
     public function pengajuanPraktikum()

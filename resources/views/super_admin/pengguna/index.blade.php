@@ -17,10 +17,9 @@
                     </div>
                 </div>
                 <div class="col-5 align-self-center">
-                    <div class="float-right">
-                        <a href="{{ route('pengguna.create') }}"
-                            class="btn btn-sm btn-primary">
-                            <i class="fas fa-plus"></i> Tambah Pengguna
+                    <div class="customize-input float-right">
+                        <a href="{{ route('pengguna.create') }}" class="btn btn-sm btn-primary d-flex align-items-center">
+                            <i class="fas fa-plus mr-2"></i> Tambah Pengguna
                         </a>
                     </div>
                 </div>
@@ -33,20 +32,24 @@
                     <div class="card">
                         <div class="card-body">
                             <h4 class="card-title">Daftar Akun Pengguna</h4>
-                            <h6 class="card-subtitle mb-4">Kelola semua akun pengguna.</h6>
-
+                            <h6 class="card-subtitle mb-4">Kelola semua akun dan profil pengguna sistem.</h6>
                             <div class="table-responsive">
-                                <table id="table-pengguna" class="table table-striped table-bordered" style="width: 100%">
+                                <table id="table-pengguna" class="table table-striped table-bordered w-100">
                                     <thead>
                                         <tr>
-                                            <th style="width: 5%">No</th>
-                                            <th>Username</th>
-                                            <th>Role</th>
-                                            <th style="width: 10%" class="text-center"><i class="fas fa-cog"></i></th>
+                                            <th style="width: 5%" class="text-center">No</th>
+                                            <th style="width: 5%" class="text-center">Foto</th>
+                                            <th>Nama Lengkap</th>
+                                            <th>NIP</th>
+                                            <th>Jenis Kelamin</th>
+                                            <th>Jabatan</th>
+                                            <th>Status</th>
+                                            <th style="width: 10%"><i class="fas fa-cog"></i></th>
                                         </tr>
                                     </thead>
                                 </table>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -59,13 +62,15 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let table;
-        $(function() {
+        $(document).ready(function() {
             table = $('#table-pengguna').DataTable({
                 responsive: true,
                 scrollX: true,
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('pengguna.data') }}',
+                ajax: {
+                    url: '{{ route('pengguna.data') }}'
+                },
                 columns: [{
                         data: 'DT_RowIndex',
                         searchable: false,
@@ -73,18 +78,27 @@
                         className: 'text-center'
                     },
                     {
-                        data: 'username'
+                        data: 'foto',
+                        searchable: false,
+                        sortable: false,
+                        className: 'text-center'
                     },
                     {
-                        data: 'role',
-                        render: function(data) {
-                            let color = 'primary';
-                            if (data === 'Super Admin') color = 'danger';
-                            else if (data === 'Admin') color = 'success';
-                            else if (data === 'Kaprodi') color = 'warning';
-                            return '<span class="badge bg-' + color + ' text-white px-2 py-1">' +
-                                data + '</span>';
-                        }
+                        data: 'nama_lengkap',
+                    },
+                    {
+                        data: 'nip'
+                    },
+                    {
+                        data: 'jenis_kelamin'
+                    },
+                    {
+                        data: 'jabatan'
+                    },
+                    {
+                        data: 'status_badge',
+                        className: 'text-center',
+                        searchable: false
                     },
                     {
                         data: 'aksi',
@@ -95,7 +109,6 @@
                 ]
             });
 
-            // Trigger SweetAlert2 untuk Session Success/Error
             @if (session('success'))
                 Swal.fire({
                     icon: 'success',
@@ -117,8 +130,8 @@
 
         function deleteData(url) {
             Swal.fire({
-                title: 'Yakin ingin menghapus data ini?',
-                text: "Data yang dihapus tidak bisa dikembalikan!",
+                title: 'Yakin menghapus pengguna ini?',
+                text: "Semua data profil terkait akan ikut terhapus!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
@@ -126,8 +139,8 @@
                 confirmButtonText: '<i class="fas fa-check-circle"></i> Ya, hapus!',
                 cancelButtonText: '<i class="fas fa-times"></i> Batal',
                 customClass: {
-                    confirmButton: 'btn btn-sm btn-danger me-2 mr-2',
-                    cancelButton: 'btn btn-sm btn-secondary ms-2 ml-2'
+                    confirmButton: 'btn btn-sm btn-danger me-2',
+                    cancelButton: 'btn btn-sm btn-secondary ms-2',
                 },
                 buttonsStyling: false
             }).then((result) => {

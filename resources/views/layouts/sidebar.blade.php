@@ -21,12 +21,6 @@
                             <i data-feather="users" class="feather-icon"></i><span class="hide-menu">Pengguna</span>
                         </a>
                     </li>
-                    <li class="sidebar-item {{ request()->routeIs('dosen.*') ? 'selected' : '' }}">
-                        <a class="sidebar-link {{ request()->routeIs('dosen.*') ? 'active' : '' }}"
-                            href="{{ route('dosen.index') }}">
-                            <i data-feather="user-check" class="feather-icon"></i><span class="hide-menu">Dosen</span>
-                        </a>
-                    </li>
                     <li class="sidebar-item {{ request()->routeIs('prodi.*') ? 'selected' : '' }}">
                         <a class="sidebar-link {{ request()->routeIs('prodi.*') ? 'active' : '' }}"
                             href="{{ route('prodi.index') }}">

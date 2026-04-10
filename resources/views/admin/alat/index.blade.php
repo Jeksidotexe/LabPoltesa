@@ -18,27 +18,11 @@
                     </div>
                 </div>
 
-                {{-- Bagian Kanan: Filter & Tombol Tambah --}}
+                {{-- Bagian Kanan: Tombol Tambah --}}
                 <div class="col-md-7 col-12 align-self-center d-flex justify-content-md-end justify-content-start">
-                    <div class="d-flex align-items-center w-100 justify-content-md-end">
-
-                        {{-- Dropdown Filter --}}
-                        <div class="mr-2" style="min-width: 200px; max-width: 220px; flex-grow: 1;">
-                            <select id="filter_lab" class="form-control select2 custom-shadow">
-                                <option value="">Semua Laboratorium</option>
-                                @foreach ($lab as $l)
-                                    <option value="{{ $l->id_lab }}">{{ $l->nama }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        {{-- Tombol Tambah --}}
-                        <a href="{{ route('alat.create') }}"
-                            class="btn btn-sm btn-info d-flex align-items-center">
-                            <i class="fas fa-plus mr-1"></i> Tambah
-                        </a>
-
-                    </div>
+                    <a href="{{ route('alat.create') }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus mr-1"></i> Tambah Alat
+                    </a>
                 </div>
             </div>
         </div>
@@ -46,12 +30,25 @@
         <div class="container-fluid pt-2">
             <div class="row">
                 <div class="col-12">
-                    <div class="card border-0 shadow-sm rounded-lg">
-                        <div class="card-body p-4">
-                            <div class="mb-4 pb-3 border-bottom">
-                                <h4 class="card-title font-weight-bold text-dark mb-1">Daftar Alat Laboratorium</h4>
-                                <h6 class="card-subtitle text-muted mb-0">Manajemen peralatan yang tersedia di dalam seluruh
-                                    laboratorium.</h6>
+                    <div class="card">
+                        <div class="card-body">
+                            <div
+                                class="d-flex justify-content-between align-items-center flex-wrap mb-4 pb-3 border-bottom">
+                                <div class="mb-2 mb-md-0">
+                                    <h4 class="card-title font-weight-bold text-dark mb-1">Daftar Alat Laboratorium</h4>
+                                    <h6 class="card-subtitle text-muted mb-0">Manajemen peralatan yang tersedia di dalam
+                                        seluruh laboratorium.</h6>
+                                </div>
+
+                                {{-- Dropdown Filter --}}
+                                <div style="min-width: 250px;">
+                                    <select id="filter_lab" class="form-control select2">
+                                        <option value="">Semua Laboratorium</option>
+                                        @foreach ($lab as $l)
+                                            <option value="{{ $l->id_lab }}">{{ $l->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
 
                             <div class="table-responsive">
@@ -65,8 +62,7 @@
                                             <th>Lokasi Lab</th>
                                             <th style="width: 10%" class="text-center">Tahun</th>
                                             <th style="width: 10%" class="text-center">Jumlah</th>
-                                            <th style="width: 10%" class="text-center"><i
-                                                    class="fas fa-cog"></i></th>
+                                            <th style="width: 10%" class="text-center"><i class="fas fa-cog"></i></th>
                                         </tr>
                                     </thead>
                                 </table>

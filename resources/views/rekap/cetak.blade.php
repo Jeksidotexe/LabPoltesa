@@ -13,53 +13,75 @@
             color: #000;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
+        /* --- STYLING UNTUK KOP SURAT --- */
+        .kop-header {
             border-bottom: 3px solid #000;
-            padding-bottom: 10px;
+            /* Garis tebal pemisah kop */
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            /* Memastikan fallback center */
         }
 
-        .header h2 {
+        .kop-table {
+            margin: 0 auto;
+            /* Membuat keseluruhan blok (gambar+teks) berada tepat di tengah */
+            width: auto;
+            /* Lebar tabel hanya mengikuti isi teks dan gambar */
+            border-collapse: collapse;
+        }
+
+        .kop-table td {
+            border: none !important;
+            /* Hilangkan garis kotak pada kop */
+            padding: 0;
+            vertical-align: middle;
+        }
+
+        .img-kop {
+            max-width: 90px;
+            /* Ukuran logo, bisa Anda sesuaikan */
+            height: auto;
+            margin-right: 25px;
+            /* Jarak antara logo dan teks */
+        }
+
+        .text-kop {
+            text-align: center;
+        }
+
+        .text-kop h4 {
             margin: 0 0 5px 0;
             font-size: 20px;
             text-transform: uppercase;
+            font-weight: 900;
         }
 
-        .header h4 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: normal;
-        }
-
-        table {
+        /* --- STYLING UNTUK TABEL DATA --- */
+        .table-data {
             width: 100%;
             border-collapse: collapse;
             font-size: 12px;
         }
 
-        table,
-        th,
-        td {
+        .table-data,
+        .table-data th,
+        .table-data td {
             border: 1px solid #000;
         }
 
-        th,
-        td {
+        .table-data th,
+        .table-data td {
             padding: 8px;
             text-align: left;
             vertical-align: middle;
         }
 
-        th {
+        .table-data th {
             background-color: #f2f2f2 !important;
             -webkit-print-color-adjust: exact;
             text-align: center;
             font-weight: bold;
-        }
-
-        .text-center {
-            text-align: center;
         }
 
         /* Pengaturan Kertas Print */
@@ -67,7 +89,6 @@
             @page {
                 margin: 1.5cm;
                 size: A4 portrait;
-                /* Diubah ke portrait karena kolom lebih sedikit */
             }
 
             body {
@@ -79,25 +100,34 @@
 
 <body onload="window.print()">
 
-    <div class="header">
-        <h4 style="font-weight: 900;">REKAPITULASI KEGIATAN PRAKTIKUM</h4>
-        <h4 style="font-weight: 900;">LABORATORIUM</h4>
+    <div class="kop-header">
+        <table class="kop-table">
+            <tr>
+                <td>
+                    <img src="{{ asset('poltesa.png') }}" alt="Logo" class="img-kop">
+                </td>
+                <td class="text-kop">
+                    <h4>REKAPITULASI KEGIATAN PRAKTIKUM</h4>
+                    <h4>LABORATORIUM</h4>
+                </td>
+            </tr>
+        </table>
     </div>
 
-    <table>
+    <table class="table-data">
         <thead>
             <tr>
                 <th width="1%">No</th>
                 <th width="10%">Tanggal Pelaksanaan</th>
-                <th width="20%">Mata Kuliah</th>
-                <th width="15%">Prodi</th>
-                <th width="10%">Waktu Pelaksanaan</th>
+                <th width="25%">Mata Kuliah</th>
+                <th width="25%">Prodi</th>
+                <th width="8%">Waktu Pelaksanaan</th>
             </tr>
         </thead>
         <tbody>
             @forelse($dataRekap as $index => $row)
                 <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td style="text-align: center;">{{ $index + 1 }}</td>
 
                     {{-- Format Tanggal Lengkap dengan Hari --}}
                     <td>{{ \Carbon\Carbon::parse($row->tanggal)->translatedFormat('l, d F Y') }}</td>
@@ -106,18 +136,18 @@
                     <td>{{ $row->makul ? $row->makul->nama : '-' }}</td>
 
                     {{-- Prodi --}}
-                    <td class="text-center">
+                    <td>
                         {{ $row->makul && $row->makul->prodi ? $row->makul->prodi->nama_prodi : '-' }}
                     </td>
 
                     {{-- Waktu Pelaksanaan --}}
-                    <td class="text-center">
+                    <td>
                         {{ substr($row->jam_mulai, 0, 5) }} - {{ substr($row->jam_selesai, 0, 5) }} WIB
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center" style="padding: 15px;">Belum ada data kegiatan praktikum.
+                    <td colspan="5" style="padding: 15px;">Belum ada data kegiatan praktikum.
                     </td>
                 </tr>
             @endforelse

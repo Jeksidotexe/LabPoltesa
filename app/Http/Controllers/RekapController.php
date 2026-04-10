@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Laboratorium;
 use App\Models\PengajuanPraktikum;
+use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,16 +23,29 @@ class RekapController extends Controller
         $totalLab = Laboratorium::count();
         $menungguVerifikasi = PengajuanPraktikum::whereIn('status', ['Menunggu Kaprodi', 'Menunggu Super Admin'])->count();
 
-        return view('rekap.index', compact('totalKegiatan', 'totalLab', 'menungguVerifikasi'));
+        // Mengambil data prodi untuk dropdown filter
+        $prodi = ProgramStudi::orderBy('nama_prodi', 'asc')->get();
+
+        return view('rekap.index', compact('totalKegiatan', 'totalLab', 'menungguVerifikasi', 'prodi'));
     }
 
     public function dataKegiatan(Request $request)
     {
-        $query = PengajuanPraktikum::with(['user.dosen', 'lab', 'makul'])->orderBy('tanggal', 'desc');
+        $query = PengajuanPraktikum::with(['user.dosen', 'lab', 'makul.prodi'])->orderBy('tanggal', 'desc');
+
+        // LOGIKA FILTER PROGRAM STUDI
+        if ($request->has('id_prodi') && $request->id_prodi != '') {
+            $query->whereHas('makul', function ($q) use ($request) {
+                $q->where('id_prodi', $request->id_prodi);
+            });
+        }
 
         return datatables()
             ->of($query)
             ->addIndexColumn()
+            ->addColumn('checkbox', function ($row) { // Tambahan Kolom Checkbox
+                return '<input type="checkbox" class="row-checkbox" value="' . $row->id_pengajuan . '" style="cursor: pointer; width: 16px; height: 16px;">';
+            })
             ->addColumn('dosen_nama', function ($row) {
                 return $row->user && $row->user->dosen ? $row->user->dosen->nama : ($row->user ? $row->user->username : '-');
             })
@@ -41,6 +55,9 @@ class RekapController extends Controller
             ->addColumn('makul_nama', function ($row) {
                 return $row->makul ? $row->makul->nama : '-';
             })
+            ->addColumn('prodi_nama', function ($row) {
+                return $row->makul && $row->makul->prodi ? $row->makul->prodi->nama_prodi : '-';
+            })
             ->editColumn('tanggal', function ($row) {
                 return \Carbon\Carbon::parse($row->tanggal)->translatedFormat('d F Y');
             })
@@ -49,8 +66,6 @@ class RekapController extends Controller
             })
             ->addColumn('status_badge', function ($row) {
                 $status = $row->status;
-
-                // PENYEDERHANAAN STATUS UNTUK TAMPILAN DATATABLES
                 if ($status == 'Disetujui') {
                     return '<span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-circle"></i> Telah Disetujui</span>';
                 } elseif (str_contains($status, 'Ditolak')) {
@@ -62,15 +77,27 @@ class RekapController extends Controller
             ->addColumn('aksi', function ($row) {
                 return '<a href="' . route('pengajuan.show', $row->id_pengajuan) . '" class="btn btn-sm btn-info btn-rounded" title="Detail"><i class="fas fa-eye"></i></a>';
             })
-            ->rawColumns(['status_badge', 'aksi'])
+            ->rawColumns(['checkbox', 'status_badge', 'aksi']) // Daftarkan checkbox agar HTML-nya terender
             ->make(true);
     }
 
-    public function cetak()
+    public function cetak(Request $request)
     {
-        $dataRekap = PengajuanPraktikum::with(['user.dosen', 'lab', 'makul'])
-            ->orderBy('tanggal', 'desc')
-            ->get();
+        $query = PengajuanPraktikum::with(['user.dosen', 'lab', 'makul.prodi'])->orderBy('tanggal', 'desc');
+
+        // Jika ada spesifik baris yang dicentang
+        if ($request->has('ids') && $request->ids != '') {
+            $ids = explode(',', $request->ids);
+            $query->whereIn('id_pengajuan', $ids);
+        }
+        // Jika tidak dicentang tapi tabel sedang difilter berdasarkan Prodi
+        elseif ($request->has('id_prodi') && $request->id_prodi != '') {
+            $query->whereHas('makul', function ($q) use ($request) {
+                $q->where('id_prodi', $request->id_prodi);
+            });
+        }
+
+        $dataRekap = $query->get();
 
         return view('rekap.cetak', compact('dataRekap'));
     }

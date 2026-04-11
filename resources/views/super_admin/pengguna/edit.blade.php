@@ -101,14 +101,14 @@
                                 <div class="row">
                                     <div class="col-md-6 form-group mb-4">
                                         <label class="form-label text-dark font-weight-medium">Gelar Depan &
-                                            Belakang</label>
+                                            Belakang <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <input type="text" class="form-control" name="gelar_depan"
                                                 value="{{ old('gelar_depan', $pengguna->gelar_depan) }}"
-                                                placeholder="Depan (Contoh: Ir.)">
+                                                placeholder="Depan (Opsional)">
                                             <input type="text" class="form-control border-left-0" name="gelar_belakang"
                                                 value="{{ old('gelar_belakang', $pengguna->gelar_belakang) }}"
-                                                placeholder="Belakang (Contoh: M.T.)">
+                                                placeholder="Belakang">
                                         </div>
                                     </div>
                                     <div class="col-md-6 form-group mb-4">

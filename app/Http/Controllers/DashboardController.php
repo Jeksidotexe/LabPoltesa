@@ -70,7 +70,7 @@ class DashboardController extends Controller
 
             // --- STATISTIK KHUSUS KAPRODI ---
             $user = Auth::user();
-            $namaTampil = $user->dosen?->nama ?? $user->username;
+            $namaTampil = $user->nama ?? $user->username;
 
             $total           = PengajuanPraktikum::count() ?? 0;
             $disetujui       = PengajuanPraktikum::where('status', 'Disetujui')->count() ?? 0;
@@ -106,7 +106,7 @@ class DashboardController extends Controller
     public function dataPengajuan()
     {
         $user = Auth::user();
-        $query = PengajuanPraktikum::with(['user.dosen', 'lab', 'makul'])->orderBy('created_at', 'desc');
+        $query = PengajuanPraktikum::with(['user', 'lab', 'makul'])->orderBy('created_at', 'desc');
 
         // Logic Filter Berdasarkan Role
         if ($user->role === 'Dosen') {
@@ -119,7 +119,20 @@ class DashboardController extends Controller
             ->of($query)
             ->addIndexColumn()
             ->addColumn('dosen_nama', function ($row) {
-                return $row->user && $row->user->dosen ? $row->user->dosen->nama : ($row->user ? $row->user->username : '-');
+                if ($row->user) {
+                    if ($row->user->nama) {
+                        $namaLengkap = $row->user->nama;
+                        if ($row->user->gelar_depan) {
+                            $namaLengkap = $row->user->gelar_depan . ' ' . $namaLengkap;
+                        }
+                        if ($row->user->gelar_belakang) {
+                            $namaLengkap .= ', ' . $row->user->gelar_belakang;
+                        }
+                        return $namaLengkap;
+                    }
+                    return $row->user->username;
+                }
+                return '-';
             })
             ->addColumn('lab_nama', function ($row) {
                 return $row->lab ? $row->lab->nama : '-';

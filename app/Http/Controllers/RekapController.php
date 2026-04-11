@@ -31,7 +31,7 @@ class RekapController extends Controller
 
     public function dataKegiatan(Request $request)
     {
-        $query = PengajuanPraktikum::with(['user.dosen', 'lab', 'makul.prodi'])->orderBy('tanggal', 'desc');
+        $query = PengajuanPraktikum::with(['user', 'lab', 'makul.prodi'])->orderBy('tanggal', 'desc');
 
         // LOGIKA FILTER PROGRAM STUDI
         if ($request->has('id_prodi') && $request->id_prodi != '') {
@@ -43,11 +43,25 @@ class RekapController extends Controller
         return datatables()
             ->of($query)
             ->addIndexColumn()
-            ->addColumn('checkbox', function ($row) { // Tambahan Kolom Checkbox
+            ->addColumn('checkbox', function ($row) {
                 return '<input type="checkbox" class="row-checkbox" value="' . $row->id_pengajuan . '" style="cursor: pointer; width: 16px; height: 16px;">';
             })
             ->addColumn('dosen_nama', function ($row) {
-                return $row->user && $row->user->dosen ? $row->user->dosen->nama : ($row->user ? $row->user->username : '-');
+                // Logika menyusun nama lengkap dari tabel users langsung
+                if ($row->user) {
+                    if ($row->user->nama) {
+                        $namaLengkap = $row->user->nama;
+                        if ($row->user->gelar_depan) {
+                            $namaLengkap = $row->user->gelar_depan . ' ' . $namaLengkap;
+                        }
+                        if ($row->user->gelar_belakang) {
+                            $namaLengkap .= ', ' . $row->user->gelar_belakang;
+                        }
+                        return $namaLengkap;
+                    }
+                    return $row->user->username;
+                }
+                return '-';
             })
             ->addColumn('lab_nama', function ($row) {
                 return $row->lab ? $row->lab->nama : '-';
@@ -77,13 +91,14 @@ class RekapController extends Controller
             ->addColumn('aksi', function ($row) {
                 return '<a href="' . route('pengajuan.show', $row->id_pengajuan) . '" class="btn btn-sm btn-info btn-rounded" title="Detail"><i class="fas fa-eye"></i></a>';
             })
-            ->rawColumns(['checkbox', 'status_badge', 'aksi']) // Daftarkan checkbox agar HTML-nya terender
+            ->rawColumns(['checkbox', 'status_badge', 'aksi'])
             ->make(true);
     }
 
     public function cetak(Request $request)
     {
-        $query = PengajuanPraktikum::with(['user.dosen', 'lab', 'makul.prodi'])->orderBy('tanggal', 'desc');
+        // Hapus relasi 'user.dosen' dan ganti menjadi 'user' saja
+        $query = PengajuanPraktikum::with(['user', 'lab', 'makul.prodi'])->orderBy('tanggal', 'desc');
 
         // Jika ada spesifik baris yang dicentang
         if ($request->has('ids') && $request->ids != '') {

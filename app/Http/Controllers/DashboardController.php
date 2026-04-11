@@ -13,10 +13,23 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $role = Auth::user()->role;
+        $user = Auth::user();
+        $role = $user->role;
+
+        // Ambil nama tampil (dengan gelar jika ada, default username jika nama kosong)
+        if ($user->nama) {
+            $namaTampil = $user->nama;
+            if ($user->gelar_depan) {
+                $namaTampil = $user->gelar_depan . ' ' . $namaTampil;
+            }
+            if ($user->gelar_belakang) {
+                $namaTampil .= ', ' . $user->gelar_belakang;
+            }
+        } else {
+            $namaTampil = $user->username;
+        }
 
         if ($role == 'Super Admin') {
-
             // --- STATISTIK KHUSUS SUPER ADMIN ---
             $total_pengguna = User::count() ?? 0;
             $total_dosen = User::where('role', 'Dosen')->count() ?? 0;
@@ -30,7 +43,6 @@ class DashboardController extends Controller
                 'antrean_verif'
             ));
         } elseif ($role == 'Admin') {
-
             // --- STATISTIK KHUSUS ADMIN ---
             $total     = PengajuanPraktikum::count();
             $proses    = PengajuanPraktikum::whereIn('status', ['Menunggu Kaprodi', 'Menunggu Super Admin'])->count();
@@ -51,11 +63,7 @@ class DashboardController extends Controller
                 'berita_acara'
             ));
         } elseif ($role == 'Dosen') {
-
             // --- STATISTIK KHUSUS DOSEN ---
-            $user = Auth::user();
-            $namaTampil = $user->nama;
-
             $total     = PengajuanPraktikum::count();
             $disetujui = PengajuanPraktikum::where('status', 'Disetujui')->count();
             $ditolak   = PengajuanPraktikum::where('status', 'like', '%Ditolak%')->count();
@@ -67,25 +75,26 @@ class DashboardController extends Controller
                 'ditolak'
             ));
         } elseif ($role == 'Kaprodi') {
+            // --- STATISTIK KHUSUS KAPRODI (HANYA PRODI YANG SAMA) ---
+            $idProdi = $user->id_prodi;
 
-            // --- STATISTIK KHUSUS KAPRODI ---
-            $user = Auth::user();
-            $namaTampil = $user->nama ?? $user->username;
+            $queryProdi = PengajuanPraktikum::whereHas('user', function ($q) use ($idProdi) {
+                $q->where('id_prodi', $idProdi);
+            });
 
-            $total           = PengajuanPraktikum::count() ?? 0;
-            $disetujui       = PengajuanPraktikum::where('status', 'Disetujui')->count() ?? 0;
-            $ditolak         = PengajuanPraktikum::where('status', 'like', '%Ditolak%')->count() ?? 0;
-            $menunggu        = PengajuanPraktikum::where('status', 'Menunggu Kaprodi')->count() ?? 0;
+            $total           = (clone $queryProdi)->count() ?? 0;
+            $disetujui       = (clone $queryProdi)->where('status', 'Disetujui')->count() ?? 0;
+            $ditolak         = (clone $queryProdi)->where('status', 'like', '%Ditolak%')->count() ?? 0;
+            $menunggu        = (clone $queryProdi)->where('status', 'Menunggu Kaprodi')->count() ?? 0;
+
             return view('kaprodi.index', compact(
                 'namaTampil',
                 'total',
                 'disetujui',
                 'ditolak',
                 'menunggu'
-
             ));
         } elseif ($role == 'Kajur') {
-
             // --- STATISTIK KHUSUS KAJUR ---
             $total     = PengajuanPraktikum::count();
             $proses    = PengajuanPraktikum::whereIn('status', ['Menunggu Kaprodi', 'Menunggu Super Admin'])->count();
@@ -106,11 +115,17 @@ class DashboardController extends Controller
     public function dataPengajuan()
     {
         $user = Auth::user();
+
         $query = PengajuanPraktikum::with(['user', 'lab', 'makul'])->orderBy('created_at', 'desc');
 
         // Logic Filter Berdasarkan Role
         if ($user->role === 'Dosen') {
             $query->where('id_users', $user->id);
+        } elseif ($user->role === 'Kaprodi') {
+            // KAPRODI HANYA MELIHAT DATA DARI PRODI YANG SAMA
+            $query->whereHas('user', function ($q) use ($user) {
+                $q->where('id_prodi', $user->id_prodi);
+            });
         } elseif ($user->role === 'Super Admin') {
             $query->whereIn('status', ['Menunggu Super Admin', 'Disetujui', 'Ditolak Super Admin']);
         }

@@ -47,11 +47,21 @@ class PengajuanPraktikumController extends Controller
 
     public function data()
     {
-        $id_users = Auth::id();
+        $user = Auth::user();
 
-        $query = PengajuanPraktikum::with(['lab', 'makul', 'kategori', 'user.dosen'])
-            ->where('id_users', $id_users)
+        $query = PengajuanPraktikum::with(['lab', 'makul', 'kategori', 'user'])
             ->orderBy('created_at', 'desc');
+
+        // Filter Berdasarkan Role
+        if ($user->role === 'Dosen') {
+            $query->where('id_users', $user->id);
+        } elseif ($user->role === 'Kaprodi') {
+            $query->whereHas('user', function ($q) use ($user) {
+                $q->where('id_prodi', $user->id_prodi);
+            });
+        } elseif ($user->role === 'Super Admin') {
+            $query->whereIn('status', ['Menunggu Super Admin', 'Disetujui', 'Ditolak Super Admin']);
+        }
 
         return datatables()
             ->of($query)
@@ -64,7 +74,16 @@ class PengajuanPraktikumController extends Controller
                 );
             })
             ->addColumn('dosen_nama', function ($row) {
-                return $row->user && $row->user->dosen ? $row->user->dosen->nama : ($row->user ? $row->user->username : '-');
+                if ($row->user) {
+                    if ($row->user->nama) {
+                        $nama = $row->user->nama;
+                        if ($row->user->gelar_depan) $nama = $row->user->gelar_depan . ' ' . $nama;
+                        if ($row->user->gelar_belakang) $nama .= ', ' . $row->user->gelar_belakang;
+                        return $nama;
+                    }
+                    return $row->user->username;
+                }
+                return '-';
             })
             ->addColumn('lab_nama', function ($row) {
                 return $row->lab ? $row->lab->nama : '-';
@@ -109,20 +128,12 @@ class PengajuanPraktikumController extends Controller
         $kategori = Kategori::orderBy('nama_kategori', 'asc')->get();
         $lab = Laboratorium::where('status', 'Aktif')->orderBy('nama', 'asc')->get();
 
-        $dosen = Auth::user()->dosen;
-        $idProdi = null;
-
-        if ($dosen) {
-            $idProdi = $dosen instanceof \Illuminate\Support\Collection
-                ? ($dosen->first()->id_prodi ?? null)
-                : ($dosen->id_prodi ?? null);
-        }
+        $idProdi = Auth::user()->id_prodi;
 
         $makul = $idProdi
             ? MataKuliah::where('id_prodi', $idProdi)->orderBy('nama', 'asc')->get()
             : MataKuliah::orderBy('nama', 'asc')->get();
 
-        // LOGIKA BARU: Minimal H+7 (Seminggu setelah hari ini)
         $minDate = Carbon::now('Asia/Jakarta')->addDays(7)->format('Y-m-d');
 
         return view('dosen.pengajuan.create', compact('kategori', 'lab', 'makul', 'minDate'));
@@ -130,14 +141,13 @@ class PengajuanPraktikumController extends Controller
 
     public function store(Request $request)
     {
-        // LOGIKA BARU: Minimal H+7 untuk validasi backend agar tidak bisa di-bypass
         $minDate = Carbon::now('Asia/Jakarta')->addDays(7)->format('Y-m-d');
 
         $request->validate([
             'id_kategori' => 'required|exists:kategori,id_kategori',
             'id_lab'      => 'required|exists:laboratorium,id_lab',
             'id_makul'    => 'required|exists:mata_kuliah,id_makul',
-            'tanggal'     => 'required|date|after_or_equal:' . $minDate, // Validasi H+7
+            'tanggal'     => 'required|date|after_or_equal:' . $minDate,
             'jam_mulai'   => 'required|date_format:H:i',
             'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
             'jobsheet'    => 'required|mimes:pdf|max:5120',
@@ -212,11 +222,17 @@ class PengajuanPraktikumController extends Controller
 
     public function show($id)
     {
-        $pengajuan = PengajuanPraktikum::with(['user.dosen', 'lab', 'makul', 'kategori'])->findOrFail($id);
+        $pengajuan = PengajuanPraktikum::with(['user', 'lab', 'makul', 'kategori'])->findOrFail($id);
         $user = Auth::user();
 
+        // Security: Hanya Dosen Pemilik yang bisa lihat detailnya sendiri
         if ($user->role == 'Dosen' && $pengajuan->id_users != $user->id) {
             abort(403, 'Anda tidak diizinkan melihat detail pengajuan dosen lain.');
+        }
+
+        // Security: Hanya Kaprodi dari PRODI YANG SAMA yang bisa lihat detail dosen tersebut
+        if ($user->role == 'Kaprodi' && $pengajuan->user->id_prodi != $user->id_prodi) {
+            abort(403, 'Anda tidak diizinkan melihat atau memverifikasi pengajuan dari Program Studi lain.');
         }
 
         $nomorReg = $this->generateSmartId(
@@ -228,7 +244,14 @@ class PengajuanPraktikumController extends Controller
 
         $isOwner   = $user->id == $pengajuan->id_users;
         $statusDB  = $pengajuan->status;
-        $namaDosen = $pengajuan->user->dosen->nama ?? $pengajuan->user->username ?? 'Unknown';
+
+        $namaDosen = $pengajuan->user->username;
+        if ($pengajuan->user->nama) {
+            $namaDosen = $pengajuan->user->nama;
+            if ($pengajuan->user->gelar_depan) $namaDosen = $pengajuan->user->gelar_depan . ' ' . $namaDosen;
+            if ($pengajuan->user->gelar_belakang) $namaDosen .= ', ' . $pengajuan->user->gelar_belakang;
+        }
+
         $namaMakul = $pengajuan->makul ? "{$pengajuan->makul->nama} ({$pengajuan->makul->kode})" : '-';
         $namaLab   = $pengajuan->lab->nama ?? 'Laboratorium Tidak Diketahui';
         $tglPrak   = Carbon::parse($pengajuan->tanggal)->translatedFormat('l, d F Y');
@@ -296,7 +319,14 @@ class PengajuanPraktikumController extends Controller
         ]);
 
         try {
-            $pengajuan = PengajuanPraktikum::findOrFail($id);
+            $pengajuan = PengajuanPraktikum::with('user')->findOrFail($id);
+            $user = Auth::user();
+
+            // Cek Keamanan Backend Jika Ditembak API secara Paksa
+            if ($user->role == 'Kaprodi' && $pengajuan->user->id_prodi != $user->id_prodi) {
+                return response()->json(['message' => 'Akses ditolak. Pengajuan berasal dari Program Studi yang berbeda.'], 403);
+            }
+
             $statusBaru = $request->status == 'Terima' ? 'Menunggu Super Admin' : 'Ditolak Kaprodi';
 
             $pengajuan->update([

@@ -72,8 +72,8 @@ class AlatController extends Controller
         $rules = [
             'id_lab'           => 'required|exists:laboratorium,id_lab',
             'nama_alat'        => 'required|string|max:100',
-            'spesifikasi_alat' => 'required|string|max:255',
-            'instruksi_kerja'  => 'required|string|max:255',
+            'spesifikasi_alat' => 'required|string',
+            'instruksi_kerja'  => 'required|string',
             'tahun_pengadaan'  => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'jumlah'           => 'required|integer|min:1',
             'foto'             => 'nullable|image|mimes:jpeg,png,jpg|max:2048' // Validasi foto alat
@@ -133,8 +133,8 @@ class AlatController extends Controller
         $rules = [
             'id_lab'           => 'required|exists:laboratorium,id_lab',
             'nama_alat'        => 'required|string|max:100',
-            'spesifikasi_alat' => 'required|string|max:255',
-            'instruksi_kerja'  => 'required|string|max:255',
+            'spesifikasi_alat' => 'required|string',
+            'instruksi_kerja'  => 'required|string',
             'tahun_pengadaan'  => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'jumlah'           => 'required|integer|min:1',
             'foto'             => 'nullable|image|mimes:jpeg,png,jpg|max:2048' // Validasi foto alat

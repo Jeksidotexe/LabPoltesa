@@ -58,7 +58,6 @@
                                             <th style="width: 5%" class="text-center">No</th>
                                             <th style="width: 10%" class="text-center">Foto</th>
                                             <th>Nama Alat</th>
-                                            <th>Spesifikasi</th>
                                             <th>Lokasi Lab</th>
                                             <th style="width: 10%" class="text-center">Tahun</th>
                                             <th style="width: 10%" class="text-center">Jumlah</th>
@@ -114,9 +113,6 @@
                     },
                     {
                         data: 'nama_alat',
-                    },
-                    {
-                        data: 'spesifikasi_alat'
                     },
                     {
                         data: 'nama_lab'

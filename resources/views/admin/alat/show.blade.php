@@ -107,7 +107,7 @@
                             <h4 class="card-title text-dark mb-3">
                                 <i data-feather="cpu" class="text-primary mr-2" style="width: 20px;"></i> Spesifikasi Teknis
                             </h4>
-                            <div class="border p-3">
+                            <div class="font-14">
                                 @if ($alat->spesifikasi_alat)
                                     <p class="text-dark mb-0" style="line-height: 1.7;">{!! nl2br(e($alat->spesifikasi_alat)) !!}</p>
                                 @else
@@ -123,7 +123,7 @@
                                 <i data-feather="clipboard" class="text-success mr-2" style="width: 20px;"></i> Instruksi
                                 Kerja
                             </h4>
-                            <div class="border p-3">
+                            <div class="font-14">
                                 @if ($alat->instruksi_kerja)
                                     <p class="text-dark mb-0" style="line-height: 1.7;">{!! nl2br(e($alat->instruksi_kerja)) !!}</p>
                                 @else

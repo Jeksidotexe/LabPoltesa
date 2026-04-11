@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id('id_alat');
             $table->unsignedBigInteger('id_lab');
             $table->string('nama_alat', 100);
-            $table->string('spesifikasi_alat', 255);
-            $table->string('instruksi_kerja', 255);
+            $table->text('spesifikasi_alat');
+            $table->text('instruksi_kerja');
             $table->year('tahun_pengadaan');
             $table->integer('jumlah');
             $table->string('foto', 2048)->nullable();

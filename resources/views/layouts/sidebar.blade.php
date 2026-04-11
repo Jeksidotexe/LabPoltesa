@@ -50,6 +50,13 @@
                     </li>
                     <li class="list-divider"></li>
                     <li class="nav-small-cap"><span class="hide-menu">Kegiatan</span></li>
+                    <li class="sidebar-item {{ request()->routeIs('jadwal.*') ? 'selected' : '' }}">
+                        <a class="sidebar-link {{ request()->routeIs('jadwal.*') ? 'active' : '' }}"
+                            href="{{ route('jadwal.index') }}" aria-expanded="false">
+                            <i data-feather="calendar" class="feather-icon"></i><span class="hide-menu">Jadwal
+                                Praktikum</span>
+                        </a>
+                    </li>
                     <li class="sidebar-item {{ request()->routeIs('rekap.*') ? 'selected' : '' }}">
                         <a class="sidebar-link {{ request()->routeIs('rekap.*') ? 'active' : '' }}"
                             href="{{ route('rekap.index') }}" aria-expanded="false">

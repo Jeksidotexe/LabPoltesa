@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AlatController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\LaboratoriumController;
 use App\Http\Controllers\LoginController;
@@ -25,6 +26,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/pengajuan-data', [DashboardController::class, 'dataPengajuan'])->name('dashboard.pengajuan.data');
     Route::get('/pengajuan/detail/{id}', [PengajuanPraktikumController::class, 'show'])->name('pengajuan.show');
+
+    Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
+    Route::get('/jadwal/data', [JadwalController::class, 'data'])->name('jadwal.data');
+    Route::get('/jadwal/{id}', [JadwalController::class, 'show'])->name('jadwal.show');
 
     Route::get('/profil-saya', [ProfilController::class, 'index'])->name('profil.show');
     Route::get('/profil-saya/edit', [ProfilController::class, 'edit'])->name('profil.edit');

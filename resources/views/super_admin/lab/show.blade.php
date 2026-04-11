@@ -17,11 +17,11 @@
                 </div>
                 <div class="col-md-5 col-12 mt-2 mt-md-0 text-md-right">
                     <a href="{{ route('lab.index') }}"
-                        class="btn btn-sm btn-outline-secondary font-12 font-weight-medium mr-2">
+                        class="btn btn-sm btn-secondary font-weight-medium mr-2">
                         <i class="fa fa-arrow-left mr-1"></i> Kembali
                     </a>
                     <a href="{{ route('lab.edit', $lab->id_lab) }}"
-                        class="btn btn-sm btn-primary font-12 font-weight-medium">
+                        class="btn btn-sm btn-primary font-weight-medium">
                         <i data-feather="edit-2" class="mr-1" style="width: 12px; height: 12px;"></i> Edit
                     </a>
                 </div>

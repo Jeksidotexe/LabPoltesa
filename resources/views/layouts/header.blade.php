@@ -61,10 +61,8 @@
                 <li class="nav-item dropdown">
                     @php
                         $user = auth()->user();
-                        $namaTampil = $user->dosen?->nama ?? $user->username;
-
-                        // Cek apakah user memiliki foto valid (Khusus Dosen)
-                        $hasFoto = $user->role == 'Dosen' && $user->dosen && $user->dosen->foto;
+                        $namaTampil = $user->nama ?? $user->role;
+                        $hasFoto = $user->foto;
                     @endphp
 
                     <a class="nav-link dropdown-toggle" href="javascript:void(0)" data-toggle="dropdown"
@@ -72,12 +70,12 @@
 
                         {{-- Logika Tampilan Foto vs Inisial --}}
                         @if ($hasFoto)
-                            <img src="{{ Storage::url($user->dosen->foto) }}" alt="user"
+                            <img src="{{ Storage::url($user->foto) }}" alt="user"
                                 class="rounded-circle border" width="40" height="40" style="object-fit: cover;">
                         @else
                             <div class="bg-primary text-white rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm border"
                                 style="width: 40px; height: 40px; font-size: 18px; border-width: 2px !important;">
-                                {{ strtoupper(substr($user->username, 0, 1)) }}
+                                {{ strtoupper(substr($user->nama, 0, 1)) }}
                             </div>
                         @endif
 
@@ -86,11 +84,11 @@
                                 class="svg-icon"></i></span>
                     </a>
 
-                    <div class="dropdown-menu dropdown-menu-right user-dd animated flipInY">
-                        <a class="dropdown-item" href="{{ route('profile.show') }}"><i data-feather="user"
+                    <ddiv class="dropdown-menu dropdown-menu-right user-dd animated flipInY">
+                        <a class="dropdown-item" href="{{ route('profil.show') }}"><i data-feather="user"
                                 class="svg-icon mr-2 ml-1"></i>
                             Profil Saya</a>
-                        <a class="dropdown-item" href="{{ route('profile.edit') }}"><i data-feather="settings"
+                        <a class="dropdown-item" href="{{ route('profil.edit') }}"><i data-feather="settings"
                                 class="svg-icon mr-2 ml-1"></i>
                             Edit Profil</a>
                         <div class="dropdown-divider"></div>
@@ -102,7 +100,7 @@
                                 <span class="hide-menu">Logout</span>
                             </a>
                         </div>
-                    </div>
+                    </ddiv>
                 </li>
             </ul>
         </div>

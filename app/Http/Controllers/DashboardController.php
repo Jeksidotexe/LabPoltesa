@@ -54,7 +54,7 @@ class DashboardController extends Controller
 
             // --- STATISTIK KHUSUS DOSEN ---
             $user = Auth::user();
-            $namaTampil = $user->dosen?->nama ?? $user->username;
+            $namaTampil = $user->nama;
 
             $total     = PengajuanPraktikum::count();
             $disetujui = PengajuanPraktikum::where('status', 'Disetujui')->count();

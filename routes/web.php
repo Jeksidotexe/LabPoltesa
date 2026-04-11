@@ -8,6 +8,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MataKuliahController;
 use App\Http\Controllers\PengajuanPraktikumController;
 use App\Http\Controllers\PenggunaController;
+use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\ProgramStudiController;
 use App\Http\Controllers\RekapController;
 use Illuminate\Support\Facades\Route;
@@ -25,9 +26,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/pengajuan-data', [DashboardController::class, 'dataPengajuan'])->name('dashboard.pengajuan.data');
     Route::get('/pengajuan/detail/{id}', [PengajuanPraktikumController::class, 'show'])->name('pengajuan.show');
 
-    Route::get('/profil', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.show');
-    Route::get('/profil/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profil', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profil-saya', [ProfilController::class, 'index'])->name('profil.show');
+    Route::get('/profil-saya/edit', [ProfilController::class, 'edit'])->name('profil.edit');
+    Route::put('/profil-saya', [ProfilController::class, 'update'])->name('profil.update');
 
     Route::get('/rekap/kegiatan', [RekapController::class, 'kegiatanLab'])->name('rekap.index');
     Route::get('/rekap/kegiatan/data', [RekapController::class, 'dataKegiatan'])->name('rekap.kegiatan.data');

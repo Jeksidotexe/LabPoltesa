@@ -130,9 +130,9 @@
                 {{-- Menu Profil --}}
                 <li class="list-divider"></li>
                 <li class="nav-small-cap"><span class="hide-menu">Pengaturan Akun</span></li>
-                <li class="sidebar-item {{ request()->routeIs('profile.*') ? 'selected' : '' }}">
-                    <a class="sidebar-link {{ request()->routeIs('profile.*') ? 'active' : '' }}"
-                        href="{{ route('profile.show') }}" aria-expanded="false">
+                <li class="sidebar-item {{ request()->routeIs('profil.*') ? 'selected' : '' }}">
+                    <a class="sidebar-link {{ request()->routeIs('profil.*') ? 'active' : '' }}"
+                        href="{{ route('profil.show') }}" aria-expanded="false">
                         <i data-feather="user" class="feather-icon"></i><span class="hide-menu">Profil Saya</span>
                     </a>
                 </li>

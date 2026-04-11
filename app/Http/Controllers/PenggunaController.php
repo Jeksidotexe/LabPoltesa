@@ -43,9 +43,16 @@ class PenggunaController extends Controller
             })
             ->addColumn('nama_lengkap', function ($pengguna) {
                 if ($pengguna->nama) {
-                    return trim($pengguna->gelar_depan . ' ' . $pengguna->nama . ' ' . $pengguna->gelar_belakang);
+                    $nama = $pengguna->nama;
+                    if ($pengguna->gelar_depan) {
+                        $nama = $pengguna->gelar_depan . ' ' . $nama;
+                    }
+                    if ($pengguna->gelar_belakang) {
+                        $nama .= ', ' . $pengguna->gelar_belakang;
+                    }
+                    return $nama;
                 }
-                return $pengguna->username; // Fallback ke username jika nama belum diisi
+                return $pengguna->username;
             })
             ->addColumn('nip', function ($pengguna) {
                 return $pengguna->nip ? $pengguna->nip : '-';
@@ -176,7 +183,13 @@ class PenggunaController extends Controller
         }
 
         if ($pengguna->nama) {
-            $namaLengkap = trim($pengguna->gelar_depan . ' ' . $pengguna->nama . ' ' . $pengguna->gelar_belakang);
+            $namaLengkap = $pengguna->nama;
+            if ($pengguna->gelar_depan) {
+                $namaLengkap = $pengguna->gelar_depan . ' ' . $namaLengkap;
+            }
+            if ($pengguna->gelar_belakang) {
+                $namaLengkap .= ', ' . $pengguna->gelar_belakang; // Tambahkan koma di sini
+            }
         } else {
             $namaLengkap = $pengguna->username;
         }

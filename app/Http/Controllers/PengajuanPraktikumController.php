@@ -115,7 +115,7 @@ class PengajuanPraktikumController extends Controller
                 $btnDetail = '<a href="' . route('pengajuan.show', $row->id_pengajuan) . '" class="btn btn-rounded btn-sm btn-info mr-2" title="Detail"><i class="fa fa-eye"></i></a>';
 
                 $fileUrl = $row->jobsheet ? Storage::url($row->jobsheet) : '#';
-                $btnFile = '<a href="' . $fileUrl . '" target="_blank" class="btn btn-rounded btn-sm btn-outline-dark" title="Lihat Jobsheet"><i class="fas fa-file-pdf"></i></a>';
+                $btnFile = '<a href="' . $fileUrl . '" target="_blank" class="btn btn-rounded btn-sm btn-dark" title="Lihat Jobsheet"><i class="fas fa-file-pdf"></i></a>';
 
                 return '<div class="d-flex justify-content-center">' . $btnDetail . $btnFile . '</div>';
             })

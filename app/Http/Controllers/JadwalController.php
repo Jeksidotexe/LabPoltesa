@@ -74,9 +74,9 @@ class JadwalController extends Controller
                 $formattedDate = $date->translatedFormat('l, d F Y');
 
                 if ($date->isToday()) {
-                    return '<span class="badge bg-danger text-white px-2 py-1 mr-2 rounded-pill"><i class="fas fa-fire mr-1"></i> Hari Ini</span> ' . $formattedDate;
+                    return '<span class="badge badge-danger px-2 py-1 mr-2"><i class="fas fa-fire mr-1"></i> Hari Ini</span> ' . $formattedDate;
                 } elseif ($date->isTomorrow()) {
-                    return '<span class="badge bg-warning text-dark px-2 py-1 mr-2 rounded-pill"><i class="fas fa-bolt mr-1"></i> Besok</span> ' . $formattedDate;
+                    return '<span class="badge badge-warning px-2 py-1 mr-2"><i class="fas fa-bolt mr-1"></i> Besok</span> ' . $formattedDate;
                 }
                 return $formattedDate;
             })

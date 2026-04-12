@@ -80,6 +80,39 @@
                                 <div class="col-sm-8 font-14">{{ $tglDibuat }} WIB</div>
                             </div>
 
+                            {{-- TABEL ALAT DIPINJAM --}}
+                            @if ($pengajuan->alat->count() > 0)
+                                <h6 class="text-uppercase text-dark font-weight-bold font-12 tracking-wide mb-3 mt-5">Daftar
+                                    Alat Dipinjam</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-borderless table-hover mb-0">
+                                        <thead class="bg-dark text-white font-14">
+                                            <tr>
+                                                <th class="font-weight-medium" style="width: 50%;">
+                                                    Nama Alat</th>
+                                                <th class="text-center font-weight-medium py-3" style="width: 20%;">Jumlah
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($pengajuan->alat as $item)
+                                                <tr class="border-bottom border-light">
+                                                    <td class="align-middle pl-3 py-3">
+                                                        <span
+                                                            class="text-dark font-weight-medium">{{ $item->nama_alat }}</span>
+                                                    </td>
+                                                    <td class="align-middle text-center py-3">
+                                                        <span
+                                                            class="badge badge-warning font-13">{{ $item->pivot->jumlah_pinjam }}
+                                                            Unit</span>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
+
                             {{-- JOBSHEET --}}
                             <h6 class="text-uppercase text-dark font-weight-bold font-12 tracking-wide mb-3 mt-5">Lampiran
                                 Dokumen</h6>
@@ -95,7 +128,6 @@
                                     {{-- Keterangan File --}}
                                     <div>
                                         <h6 class="font-weight-bold text-dark mb-1 font-14" style="letter-spacing: 0.3px;">
-                                            {{-- Mengambil nama file asli dari database --}}
                                             {{ $pengajuan->jobsheet ? basename($pengajuan->jobsheet) : 'Tidak ada lampiran' }}
                                         </h6>
                                         <div class="d-flex align-items-center text-muted font-12">
@@ -106,7 +138,6 @@
                                     </div>
                                 </div>
 
-                                {{-- Tombol Minimalis (Hanya tampil jika file ada) --}}
                                 @if ($pengajuan->jobsheet)
                                     <a href="{{ Storage::url($pengajuan->jobsheet) }}" target="_blank"
                                         class="btn btn-sm btn-dark">
@@ -178,7 +209,7 @@
                                             @elseif($tl_3 == 'rejected')
                                                 Ditolak
                                             @elseif($tl_3 == 'done')
-                                                Terjadwal
+                                                Terjadwal / Selesai
                                             @else
                                                 Menunggu Verifikasi Kaprodi
                                             @endif
@@ -187,7 +218,7 @@
                                 </div>
                             </div>
 
-                            {{-- Aksi --}}
+                            {{-- Aksi Verifikasi Kaprodi/Admin --}}
                             @if ($canReview || ($isOwner && str_contains($statusDB, 'Ditolak')))
                                 <div class="mt-4 pt-4 border-top">
                                     @if ($canReview)
@@ -216,6 +247,16 @@
                                 </div>
                             @endif
 
+                            {{-- Aksi Pengembalian Alat (KHUSUS ADMIN) --}}
+                            @if (isset($canReturn) && $canReturn)
+                                <div class="mt-4 pt-4 border-top">
+                                    <button type="button" class="btn btn-sm btn-primary btn-block font-weight-medium"
+                                        data-toggle="modal" data-target="#modalKembali">
+                                        <i class="fas fa-box-open mr-1"></i> Kembalikan Alat & Selesai
+                                    </button>
+                                </div>
+                            @endif
+
                         </div>
                     </div>
                 </div>
@@ -224,8 +265,8 @@
         </div>
     </div>
 
-    {{-- INCLUDE MODAL VERIFIKASI (JIKA ADA AKSES) --}}
-    @if ($canReview)
+    {{-- INCLUDE MODAL VERIFIKASI (Panggil Form.blade.php) --}}
+    @if ($canReview || (isset($canReturn) && $canReturn))
         @include('pengajuan.form')
     @endif
 
@@ -273,7 +314,6 @@
             padding-left: 15px;
         }
 
-        /* Status: Active (Kuning/Primary) */
         .ct-item.active .ct-point {
             background-color: #007bff;
             box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
@@ -283,13 +323,11 @@
             color: #007bff !important;
         }
 
-        /* Status: Done (Hijau) */
         .ct-item.done .ct-point {
             background-color: #28a745;
             box-shadow: 0 0 0 1px #28a745;
         }
 
-        /* Status: Rejected (Merah) */
         .ct-item.rejected .ct-point {
             background-color: #dc3545;
             box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
@@ -299,17 +337,14 @@
             color: #dc3545 !important;
         }
 
-        /* Status: Pending (Abu-abu - default) */
         .ct-item.pending .ct-content h6 {
             color: #6c757d !important;
         }
 
-        /* Latar merah sangat lembut untuk ikon PDF */
         .bg-light-danger {
             background-color: #fff0f1 !important;
         }
 
-        /* Efek tombol saat di-hover */
         .hover-primary:hover {
             color: #5f76e8 !important;
             border-color: #5f76e8 !important;
@@ -319,7 +354,6 @@
             color: #5f76e8 !important;
         }
 
-        /* Transisi halus */
         .transition-hover {
             transition: all 0.2s ease-in-out;
         }
@@ -328,15 +362,11 @@
             border-color: #ced4da !important;
         }
 
-        /* Scrollable Note & Custom Scrollbar */
         .scrollable-note {
             max-height: 120px;
-            /* Batas tinggi maksimal (sekitar 5-6 baris) */
             overflow-y: auto;
-            /* Munculkan scroll vertikal jika teks melebihi tinggi */
         }
 
-        /* Mempercantik Scrollbar (Khusus Webkit: Chrome, Safari, Edge) */
         .scrollable-note::-webkit-scrollbar {
             width: 5px;
         }
@@ -348,7 +378,6 @@
 
         .scrollable-note::-webkit-scrollbar-thumb {
             background: #dc3545;
-            /* Warna merah senada dengan border */
             border-radius: 10px;
             opacity: 0.5;
         }
@@ -366,6 +395,36 @@
             if (typeof feather !== 'undefined') feather.replace();
         });
 
+        // LOGIKA PENYELESAIAN PRAKTIKUM & PENGEMBALIAN ALAT
+        @if (isset($canReturn) && $canReturn)
+            function submitPengembalian() {
+                let btn = $('#btn-submit-kembali');
+                btn.html('<i class="fas fa-spinner fa-spin mr-1"></i> Memproses...').prop('disabled', true);
+
+                $.post('{{ route('pengajuan.return', $pengajuan->id_pengajuan) }}', $('#form-pengembalian').serialize() +
+                        '&_token={{ csrf_token() }}')
+                    .done(res => {
+                        $('#modalKembali').modal('hide');
+                        Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: res.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                            .then(() => window.location.reload());
+                    }).fail(() => {
+                        btn.html('<i class="fas fa-check mr-1"></i> Konfirmasi Selesai').prop('disabled', false);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Terjadi kesalahan sistem saat memproses pengembalian.'
+                        });
+                    });
+            }
+        @endif
+
+        // LOGIKA VERIFIKASI KAPRODI DAN ADMIN
         @if ($canReview)
             function submitReview(statusKeputusan, roleTipe) {
 

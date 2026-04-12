@@ -75,9 +75,9 @@
                             </div>
                         </div>
 
-                        {{-- Baris 2: Tahun & Jumlah --}}
+                        {{-- Baris 2: Tahun, Jumlah, Kondisi --}}
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group mb-4">
                                     <label class="form-label text-dark font-weight-medium">Tahun Pengadaan <span
                                             class="text-danger">*</span></label>
@@ -90,13 +90,32 @@
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group mb-4">
                                     <label class="form-label text-dark font-weight-medium">Jumlah Unit <span
                                             class="text-danger">*</span></label>
                                     <input type="number" class="form-control @error('jumlah') is-invalid @enderror"
                                         name="jumlah" value="{{ old('jumlah', $alat->jumlah) }}" min="1" required>
                                     @error('jumlah')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-4">
+                                    <label class="form-label text-dark font-weight-medium">Kondisi Alat <span
+                                            class="text-danger">*</span></label>
+                                    <select class="form-control select2" name="kondisi" required>
+                                        <option value="Baik"
+                                            {{ old('kondisi', $alat->kondisi) == 'Baik' ? 'selected' : '' }}>Baik</option>
+                                        <option value="Rusak Ringan"
+                                            {{ old('kondisi', $alat->kondisi) == 'Rusak Ringan' ? 'selected' : '' }}>Rusak
+                                            Ringan</option>
+                                        <option value="Rusak Berat"
+                                            {{ old('kondisi', $alat->kondisi) == 'Rusak Berat' ? 'selected' : '' }}>Rusak
+                                            Berat</option>
+                                    </select>
+                                    @error('kondisi')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -136,8 +155,9 @@
                                 <small class="text-muted d-block mb-3">Biarkan jika tidak ingin mengubah foto saat
                                     ini.</small>
 
-                                {{-- Drag Zone (Sembunyi jika ada foto, dikontrol via $hasFoto dari controller) --}}
-                                <div class="drag-drop-zone custom-radius {{ $hasFoto ? 'd-none' : '' }}" id="dragDropZone">
+                                {{-- Drag Zone --}}
+                                <div class="drag-drop-zone custom-radius {{ $hasFoto ? 'd-none' : '' }}"
+                                    id="dragDropZone">
                                     <div class="dz-message">
                                         <i class="fas fa-image text-primary mb-2 fa-3x"></i>
                                         <h6 class="font-weight-bold text-dark mb-1">Tarik & Lepas Foto di Sini</h6>
@@ -152,7 +172,7 @@
                                     <div class="text-danger font-13 mt-2">{{ $message }}</div>
                                 @enderror
 
-                                {{-- Preview Zone (Dipanggil menggunakan $urlFoto dari Controller) --}}
+                                {{-- Preview Zone --}}
                                 <div id="previewContainer"
                                     class="mt-2 text-center p-4 border custom-radius bg-light {{ $hasFoto ? '' : 'd-none' }}">
                                     <img id="imagePreview" src="{{ $urlFoto }}" alt="Preview Foto"
@@ -232,7 +252,6 @@
             const imagePreview = document.getElementById('imagePreview');
             const removeBtn = document.getElementById('removeImage');
 
-            // Simpan referensi foto awal dari database
             const oldImageSrc = imagePreview.src;
 
             if (dropZone) {
@@ -275,11 +294,9 @@
             if (removeBtn) {
                 removeBtn.addEventListener('click', () => {
                     fileInput.value = '';
-                    // Jika data sebelumnya punya foto, kembalikan ke foto tersebut
                     if (oldImageSrc && oldImageSrc !== window.location.href) {
                         imagePreview.src = oldImageSrc;
                     } else {
-                        // Jika tidak punya foto, kosongkan dan tampilkan ulang dropzone
                         imagePreview.src = '';
                         previewContainer.classList.add('d-none');
                         dropZone.classList.remove('d-none');

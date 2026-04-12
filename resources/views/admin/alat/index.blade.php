@@ -61,6 +61,7 @@
                                             <th>Lokasi Lab</th>
                                             <th style="width: 10%" class="text-center">Tahun</th>
                                             <th style="width: 10%" class="text-center">Jumlah</th>
+                                            <th style="width: 10%" class="text-center">Kondisi</th>
                                             <th style="width: 10%" class="text-center"><i class="fas fa-cog"></i></th>
                                         </tr>
                                     </thead>
@@ -128,6 +129,11 @@
                             return '<span class="badge bg-secondary text-white px-3 py-1 border">' +
                                 data + '</span>';
                         }
+                    },
+                    {
+                        data: 'kondisi_badge',
+                        className: 'text-center',
+                        searchable: false,
                     },
                     {
                         data: 'aksi',

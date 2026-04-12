@@ -15,6 +15,9 @@ class Alat extends Model
         'instruksi_kerja',
         'tahun_pengadaan',
         'jumlah',
+        'jumlah_rusak_ringan',
+        'jumlah_rusak_berat',
+        'kondisi',
         'foto'
     ];
 

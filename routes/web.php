@@ -63,6 +63,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:Admin'])->group(function () {
         Route::get('/alat/data', [AlatController::class, 'data'])->name('alat.data');
         Route::resource('/alat', AlatController::class);
+        Route::post('/alat/{id}/repair', [AlatController::class, 'repair'])->name('alat.repair');
+        Route::post('/pengajuan/pengembalian/{id}', [PengajuanPraktikumController::class, 'returnPraktikum'])->name('pengajuan.return');
     });
 
     // === KHUSUS DOSEN ===

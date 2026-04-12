@@ -6,9 +6,11 @@ use App\Models\Laboratorium;
 use App\Models\MataKuliah;
 use App\Models\PengajuanPraktikum;
 use App\Models\Kategori;
+use App\Models\Alat;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -59,8 +61,9 @@ class PengajuanPraktikumController extends Controller
             $query->whereHas('user', function ($q) use ($user) {
                 $q->where('id_prodi', $user->id_prodi);
             });
-        } elseif ($user->role === 'Super Admin') {
-            $query->whereIn('status', ['Menunggu Super Admin', 'Disetujui', 'Ditolak Super Admin']);
+        } elseif ($user->role === 'Super Admin' || $user->role === 'Admin') {
+            // Tambahkan 'Selesai'
+            $query->whereIn('status', ['Menunggu Super Admin', 'Disetujui', 'Ditolak Super Admin', 'Selesai']);
         }
 
         return datatables()
@@ -105,6 +108,8 @@ class PengajuanPraktikumController extends Controller
 
                 if ($status == 'Disetujui') {
                     return '<span class="badge bg-success text-white px-2 py-1">Telah Disetujui</span>';
+                } elseif ($status == 'Selesai') {
+                    return '<span class="badge bg-primary text-white px-2 py-1">Selesai</span>';
                 } elseif (str_contains($status, 'Ditolak')) {
                     return '<span class="badge bg-danger text-white px-2 py-1">Ditolak</span>';
                 } else {
@@ -128,6 +133,9 @@ class PengajuanPraktikumController extends Controller
         $kategori = Kategori::orderBy('nama_kategori', 'asc')->get();
         $lab = Laboratorium::where('status', 'Aktif')->orderBy('nama', 'asc')->get();
 
+        // Ambil data alat yang kondisinya Baik dan stok > 0
+        $alat = Alat::where('kondisi', 'Baik')->where('jumlah', '>', 0)->get(['id_alat', 'id_lab', 'nama_alat', 'jumlah']);
+
         $idProdi = Auth::user()->id_prodi;
 
         $makul = $idProdi
@@ -136,7 +144,7 @@ class PengajuanPraktikumController extends Controller
 
         $minDate = Carbon::now('Asia/Jakarta')->addDays(7)->format('Y-m-d');
 
-        return view('dosen.pengajuan.create', compact('kategori', 'lab', 'makul', 'minDate'));
+        return view('dosen.pengajuan.create', compact('kategori', 'lab', 'makul', 'minDate', 'alat'));
     }
 
     public function store(Request $request)
@@ -144,13 +152,15 @@ class PengajuanPraktikumController extends Controller
         $minDate = Carbon::now('Asia/Jakarta')->addDays(7)->format('Y-m-d');
 
         $request->validate([
-            'id_kategori' => 'required|exists:kategori,id_kategori',
-            'id_lab'      => 'required|exists:laboratorium,id_lab',
-            'id_makul'    => 'required|exists:mata_kuliah,id_makul',
-            'tanggal'     => 'required|date|after_or_equal:' . $minDate,
-            'jam_mulai'   => 'required|date_format:H:i',
-            'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
-            'jobsheet'    => 'required|mimes:pdf|max:5120',
+            'id_kategori'   => 'required|exists:kategori,id_kategori',
+            'id_lab'        => 'required|exists:laboratorium,id_lab',
+            'id_makul'      => 'required|exists:mata_kuliah,id_makul',
+            'tanggal'       => 'required|date|after_or_equal:' . $minDate,
+            'jam_mulai'     => 'required|date_format:H:i',
+            'jam_selesai'   => 'required|date_format:H:i|after:jam_mulai',
+            'jobsheet'      => 'required|mimes:pdf|max:5120',
+            'id_alat'       => 'nullable|array',
+            'jumlah_pinjam' => 'nullable|array',
         ], [
             'tanggal.after_or_equal'  => 'Tanggal praktikum minimal harus 7 hari (seminggu) setelah tanggal pengajuan.',
             'jam_selesai.after'       => 'Jam selesai harus lebih besar dari jam mulai.'
@@ -165,20 +175,20 @@ class PengajuanPraktikumController extends Controller
         // LOGIKA 1: Cek Diri Sendiri Bentrok
         $cekDiriSendiri = PengajuanPraktikum::where('id_users', $userId)
             ->whereDate('tanggal', $tanggal)
-            ->whereNotIn('status', ['Ditolak Kaprodi', 'Ditolak Super Admin'])
+            ->whereNotIn('status', ['Ditolak Kaprodi', 'Ditolak Super Admin', 'Selesai'])
             ->where(function ($query) use ($jamMulai, $jamSelesai) {
                 $query->whereTime('jam_mulai', '<', $jamSelesai)
                     ->whereTime('jam_selesai', '>', $jamMulai);
             })->first();
 
         if ($cekDiriSendiri) {
-            return redirect()->back()->with('error', 'Gagal! Anda sudah memiliki jadwal pengajuan lain pada tanggal dan rentang waktu yang berbenturan dengan ini.')->withInput();
+            return redirect()->back()->with('error', 'Gagal! Anda sudah memiliki jadwal pengajuan lain pada rentang waktu tersebut.')->withInput();
         }
 
         // LOGIKA 2: Cek Lab Bentrok dengan orang lain
         $cekLabBentrok = PengajuanPraktikum::where('id_lab', $idLab)
             ->whereDate('tanggal', $tanggal)
-            ->whereNotIn('status', ['Ditolak Kaprodi', 'Ditolak Super Admin'])
+            ->whereNotIn('status', ['Ditolak Kaprodi', 'Ditolak Super Admin', 'Selesai'])
             ->where(function ($query) use ($jamMulai, $jamSelesai) {
                 $query->whereTime('jam_mulai', '<', $jamSelesai)
                     ->whereTime('jam_selesai', '>', $jamMulai);
@@ -186,10 +196,12 @@ class PengajuanPraktikumController extends Controller
 
         if ($cekLabBentrok) {
             $statusBentrok = $cekLabBentrok->status == 'Disetujui' ? 'sudah disetujui (dibooking)' : 'sedang dalam proses pengajuan';
-            return redirect()->back()->with('error', "Gagal! Laboratorium tersebut {$statusBentrok} oleh dosen lain pada rentang waktu yang Anda pilih. Silakan pilih jam atau lab lain.")->withInput();
+            return redirect()->back()->with('error', "Gagal! Laboratorium tersebut {$statusBentrok} oleh dosen lain pada rentang waktu yang Anda pilih.")->withInput();
         }
 
         try {
+            DB::beginTransaction();
+
             $path = null;
             if ($request->hasFile('jobsheet')) {
                 $file = $request->file('jobsheet');
@@ -200,7 +212,7 @@ class PengajuanPraktikumController extends Controller
                 $path = $file->storeAs('pengajuan/jobsheets', $fileName, 'public');
             }
 
-            PengajuanPraktikum::create([
+            $pengajuan = PengajuanPraktikum::create([
                 'id_users'    => $userId,
                 'id_kategori' => $request->id_kategori,
                 'id_lab'      => $idLab,
@@ -213,8 +225,27 @@ class PengajuanPraktikumController extends Controller
                 'catatan'     => null
             ]);
 
+            // Simpan data alat ke tabel pivot
+            if ($request->has('id_alat') && !empty($request->id_alat[0])) {
+                foreach ($request->id_alat as $index => $id_alat) {
+                    $jumlah_pinjam = $request->jumlah_pinjam[$index] ?? 1;
+                    $alatDb = Alat::find($id_alat);
+                    if ($alatDb && $alatDb->jumlah >= $jumlah_pinjam) {
+                        DB::table('pengajuan_alat')->insert([
+                            'id_pengajuan'  => $pengajuan->id_pengajuan,
+                            'id_alat'       => $id_alat,
+                            'jumlah_pinjam' => $jumlah_pinjam,
+                            'created_at'    => now(),
+                            'updated_at'    => now(),
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
             return redirect()->route('dashboard')->with('success', 'Pengajuan berhasil dikirim. Menunggu verifikasi Kaprodi.');
         } catch (\Exception $e) {
+            DB::rollback();
             Log::error('Error submit pengajuan: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Terjadi kesalahan sistem saat menyimpan data.')->withInput();
         }
@@ -222,15 +253,13 @@ class PengajuanPraktikumController extends Controller
 
     public function show($id)
     {
-        $pengajuan = PengajuanPraktikum::with(['user', 'lab', 'makul', 'kategori'])->findOrFail($id);
+        $pengajuan = PengajuanPraktikum::with(['user', 'lab', 'makul', 'kategori', 'alat'])->findOrFail($id);
         $user = Auth::user();
 
-        // Security: Hanya Dosen Pemilik yang bisa lihat detailnya sendiri
+        // Security
         if ($user->role == 'Dosen' && $pengajuan->id_users != $user->id) {
             abort(403, 'Anda tidak diizinkan melihat detail pengajuan dosen lain.');
         }
-
-        // Security: Hanya Kaprodi dari PRODI YANG SAMA yang bisa lihat detail dosen tersebut
         if ($user->role == 'Kaprodi' && $pengajuan->user->id_prodi != $user->id_prodi) {
             abort(403, 'Anda tidak diizinkan melihat atau memverifikasi pengajuan dari Program Studi lain.');
         }
@@ -263,16 +292,27 @@ class PengajuanPraktikumController extends Controller
         $canReview        = $canReviewKaprodi || $canReviewAdmin;
         $roleTipe         = $canReviewKaprodi ? 'kaprodi' : 'admin';
 
+        // =========================================================================
+        // LOGIKA BARU: Cek apakah waktu saat ini melebihi jadwal selesai praktikum
+        // =========================================================================
+        $waktuSelesaiPraktikum = Carbon::parse($pengajuan->tanggal . ' ' . $pengajuan->jam_selesai, 'Asia/Jakarta');
+        $waktuSekarang = Carbon::now('Asia/Jakarta');
+        $sudahLewatWaktuSelesai = $waktuSekarang->greaterThanOrEqualTo($waktuSelesaiPraktikum);
+
+        // Hanya role Admin, status disetujui, dan waktunya sudah terlewat yang bisa memunculkan tombol!
+        $canReturn = ($user->role == 'Admin') && ($statusDB == 'Disetujui') && $sudahLewatWaktuSelesai;
+
         $statusConfig = [
             'Menunggu Kaprodi'     => ['label' => 'Menunggu Verifikasi Kaprodi', 'color' => 'warning', 'icon' => 'clock'],
             'Menunggu Super Admin' => ['label' => 'Menunggu Finalisasi Super Admin', 'color' => 'primary', 'icon' => 'loader'],
             'Disetujui'            => ['label' => 'Telah Disetujui', 'color' => 'success', 'icon' => 'check'],
+            'Selesai'              => ['label' => 'Selesai', 'color' => 'primary', 'icon' => 'flag'],
         ];
         $uiStatus = $statusConfig[$statusDB] ?? ['label' => 'Ditolak', 'color' => 'danger', 'icon' => 'x'];
 
         $tl_1 = 'done';
         $tl_2 = 'pending';
-        if (in_array($statusDB, ['Menunggu Super Admin', 'Disetujui', 'Ditolak Super Admin'])) {
+        if (in_array($statusDB, ['Menunggu Super Admin', 'Disetujui', 'Ditolak Super Admin', 'Selesai'])) {
             $tl_2 = 'done';
         } elseif ($statusDB == 'Ditolak Kaprodi') {
             $tl_2 = 'rejected';
@@ -281,7 +321,7 @@ class PengajuanPraktikumController extends Controller
         }
 
         $tl_3 = 'pending';
-        if ($statusDB == 'Disetujui') {
+        if (in_array($statusDB, ['Disetujui', 'Selesai'])) {
             $tl_3 = 'done';
         } elseif ($statusDB == 'Ditolak Super Admin') {
             $tl_3 = 'rejected';
@@ -307,7 +347,8 @@ class PengajuanPraktikumController extends Controller
             'uiStatus',
             'tl_1',
             'tl_2',
-            'tl_3'
+            'tl_3',
+            'canReturn'
         ));
     }
 
@@ -322,9 +363,8 @@ class PengajuanPraktikumController extends Controller
             $pengajuan = PengajuanPraktikum::with('user')->findOrFail($id);
             $user = Auth::user();
 
-            // Cek Keamanan Backend Jika Ditembak API secara Paksa
             if ($user->role == 'Kaprodi' && $pengajuan->user->id_prodi != $user->id_prodi) {
-                return response()->json(['message' => 'Akses ditolak. Pengajuan berasal dari Program Studi yang berbeda.'], 403);
+                return response()->json(['message' => 'Akses ditolak.'], 403);
             }
 
             $statusBaru = $request->status == 'Terima' ? 'Menunggu Super Admin' : 'Ditolak Kaprodi';
@@ -336,7 +376,6 @@ class PengajuanPraktikumController extends Controller
 
             return response()->json(['message' => 'Review Kaprodi berhasil disimpan.'], 200);
         } catch (\Exception $e) {
-            Log::error('Error verify Kaprodi: ' . $e->getMessage());
             return response()->json(['message' => 'Gagal memproses verifikasi.'], 500);
         }
     }
@@ -349,6 +388,7 @@ class PengajuanPraktikumController extends Controller
         ]);
 
         try {
+            DB::beginTransaction();
             $pengajuan = PengajuanPraktikum::findOrFail($id);
             $statusBaru = $request->status == 'Terima' ? 'Disetujui' : 'Ditolak Super Admin';
 
@@ -357,10 +397,71 @@ class PengajuanPraktikumController extends Controller
                 'catatan' => $request->catatan
             ]);
 
+            // Jika disetujui, potong stok alat
+            if ($request->status == 'Terima') {
+                $alatPinjam = DB::table('pengajuan_alat')->where('id_pengajuan', $id)->get();
+                foreach ($alatPinjam as $item) {
+                    Alat::where('id_alat', $item->id_alat)->decrement('jumlah', $item->jumlah_pinjam);
+                }
+            }
+
+            DB::commit();
             return response()->json(['message' => 'Finalisasi selesai. Jadwal telah diperbarui.'], 200);
         } catch (\Exception $e) {
-            Log::error('Error verify Admin: ' . $e->getMessage());
+            DB::rollback();
             return response()->json(['message' => 'Gagal memproses finalisasi.'], 500);
+        }
+    }
+
+    public function returnPraktikum(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+            $pengajuan = PengajuanPraktikum::findOrFail($id);
+            $pengajuan->update(['status' => 'Selesai']);
+
+            $alatPinjam = DB::table('pengajuan_alat')->where('id_pengajuan', $id)->get();
+
+            foreach ($alatPinjam as $item) {
+                $id_alat = $item->id_alat;
+
+                // Ambil inputan dari form, jika kosong anggap 0
+                $jml_baik   = $request->jml_baik[$id_alat] ?? 0;
+                $jml_ringan = $request->jml_ringan[$id_alat] ?? 0;
+                $jml_berat  = $request->jml_berat[$id_alat] ?? 0;
+
+                // 1. Update riwayat di tabel Pivot
+                DB::table('pengajuan_alat')->where('id', $item->id)->update([
+                    'status_kembali'   => 'Sudah',
+                    'jml_kembali_baik' => $jml_baik,
+                    'jml_rusak_ringan' => $jml_ringan,
+                    'jml_rusak_berat'  => $jml_berat,
+                    'updated_at'       => now()
+                ]);
+
+                // 2. Update Stok di Tabel Master Alat
+                $alatMaster = Alat::find($id_alat);
+                if ($alatMaster) {
+                    // Tambahkan kembali ke stok 'Baik' agar bisa dipinjam orang lain
+                    if ($jml_baik > 0) {
+                        $alatMaster->increment('jumlah', $jml_baik);
+                    }
+                    // Tambahkan ke keranjang 'Rusak' (sebagai catatan aset yang rusak, tidak bisa dipinjam)
+                    if ($jml_ringan > 0) {
+                        $alatMaster->increment('jumlah_rusak_ringan', $jml_ringan);
+                    }
+                    if ($jml_berat > 0) {
+                        $alatMaster->increment('jumlah_rusak_berat', $jml_berat);
+                    }
+                }
+            }
+
+            DB::commit();
+            return response()->json(['message' => 'Praktikum Selesai dan rincian alat berhasil dicatat.'], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Error return praktikum: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal memproses pengembalian.'], 500);
         }
     }
 }

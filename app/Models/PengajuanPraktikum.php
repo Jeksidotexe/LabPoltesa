@@ -40,4 +40,11 @@ class PengajuanPraktikum extends Model
     {
         return $this->belongsTo(MataKuliah::class, 'id_makul', 'id_makul');
     }
+
+    public function alat()
+    {
+        return $this->belongsToMany(Alat::class, 'pengajuan_alat', 'id_pengajuan', 'id_alat')
+            ->withPivot('id', 'jumlah_pinjam', 'status_kembali', 'jml_kembali_baik', 'jml_rusak_ringan', 'jml_rusak_berat')
+            ->withTimestamps();
+    }
 }

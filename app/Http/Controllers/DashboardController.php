@@ -46,7 +46,8 @@ class DashboardController extends Controller
             // --- STATISTIK KHUSUS ADMIN ---
             $total     = PengajuanPraktikum::count();
             $proses    = PengajuanPraktikum::whereIn('status', ['Menunggu Kaprodi', 'Menunggu Super Admin'])->count();
-            $disetujui = PengajuanPraktikum::where('status', 'Disetujui')->count();
+            // Disetujui digabungkan dengan Selesai sebagai indikator sukses
+            $disetujui = PengajuanPraktikum::whereIn('status', ['Disetujui', 'Selesai'])->count();
             $ditolak   = PengajuanPraktikum::where('status', 'like', '%Ditolak%')->count();
 
             $total_jenis_alat  = Alat::count() ?? 0;
@@ -65,7 +66,8 @@ class DashboardController extends Controller
         } elseif ($role == 'Dosen') {
             // --- STATISTIK KHUSUS DOSEN ---
             $total     = PengajuanPraktikum::count();
-            $disetujui = PengajuanPraktikum::where('status', 'Disetujui')->count();
+            // Disetujui digabungkan dengan Selesai sebagai indikator sukses
+            $disetujui = PengajuanPraktikum::whereIn('status', ['Disetujui', 'Selesai'])->count();
             $ditolak   = PengajuanPraktikum::where('status', 'like', '%Ditolak%')->count();
 
             return view('dosen.index', compact(
@@ -83,7 +85,8 @@ class DashboardController extends Controller
             });
 
             $total           = (clone $queryProdi)->count() ?? 0;
-            $disetujui       = (clone $queryProdi)->where('status', 'Disetujui')->count() ?? 0;
+            // Disetujui digabungkan dengan Selesai sebagai indikator sukses
+            $disetujui       = (clone $queryProdi)->whereIn('status', ['Disetujui', 'Selesai'])->count() ?? 0;
             $ditolak         = (clone $queryProdi)->where('status', 'like', '%Ditolak%')->count() ?? 0;
             $menunggu        = (clone $queryProdi)->where('status', 'Menunggu Kaprodi')->count() ?? 0;
 
@@ -98,7 +101,8 @@ class DashboardController extends Controller
             // --- STATISTIK KHUSUS KAJUR ---
             $total     = PengajuanPraktikum::count();
             $proses    = PengajuanPraktikum::whereIn('status', ['Menunggu Kaprodi', 'Menunggu Super Admin'])->count();
-            $disetujui = PengajuanPraktikum::where('status', 'Disetujui')->count();
+            // Disetujui digabungkan dengan Selesai sebagai indikator sukses
+            $disetujui = PengajuanPraktikum::whereIn('status', ['Disetujui', 'Selesai'])->count();
             $ditolak   = PengajuanPraktikum::where('status', 'like', '%Ditolak%')->count();
 
             return view('kajur.index', compact(
@@ -126,8 +130,9 @@ class DashboardController extends Controller
             $query->whereHas('user', function ($q) use ($user) {
                 $q->where('id_prodi', $user->id_prodi);
             });
-        } elseif ($user->role === 'Super Admin') {
-            $query->whereIn('status', ['Menunggu Super Admin', 'Disetujui', 'Ditolak Super Admin']);
+        } elseif ($user->role === 'Super Admin' || $user->role === 'Admin') {
+            // TAMBAHAN: Menambahkan status 'Selesai' dan role 'Admin' agar bisa melihat list
+            $query->whereIn('status', ['Menunggu Super Admin', 'Disetujui', 'Ditolak Super Admin', 'Selesai']);
         }
 
         return datatables()
@@ -175,6 +180,9 @@ class DashboardController extends Controller
                         return '<span class="badge bg-primary text-white px-2 py-1"><i class="fas fa-spinner fa-spin mr-1"></i> Verifikasi Super Admin</span>';
                     } elseif ($status == 'Disetujui') {
                         return '<span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-circle mr-1"></i> Telah Disetujui</span>';
+                    } elseif ($status == 'Selesai') {
+                        // TAMBAHAN UNTUK KAJUR
+                        return '<span class="badge bg-info text-white px-2 py-1"><i class="fas fa-flag-checkered mr-1"></i> Selesai</span>';
                     } elseif (str_contains($status, 'Ditolak')) {
                         return '<span class="badge bg-danger text-white px-2 py-1"><i class="fas fa-ban mr-1"></i> ' . $status . '</span>';
                     }
@@ -182,11 +190,14 @@ class DashboardController extends Controller
 
                 // --- TAMPILAN BADGE STANDAR UNTUK ROLE LAIN ---
                 if ($status == 'Disetujui') {
-                    return '<span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-circle"></i> Telah Disetujui</span>';
+                    return '<span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-circle mr-1"></i> Telah Disetujui</span>';
+                } elseif ($status == 'Selesai') {
+                    // TAMBAHAN BADGE SELESAI
+                    return '<span class="badge bg-primary text-white px-2 py-1"><i class="fas fa-flag-checkered mr-1"></i> Selesai</span>';
                 } elseif (str_contains($status, 'Ditolak')) {
-                    return '<span class="badge bg-danger text-white px-2 py-1"><i class="fas fa-times-circle"></i> Ditolak</span>';
+                    return '<span class="badge bg-danger text-white px-2 py-1"><i class="fas fa-times-circle mr-1"></i> Ditolak</span>';
                 } else {
-                    return '<span class="badge bg-warning text-dark px-2 py-1"><i class="fas fa-sync-alt fa-spin"></i> Diproses</span>';
+                    return '<span class="badge bg-warning text-dark px-2 py-1"><i class="fas fa-sync-alt fa-spin mr-1"></i> Diproses</span>';
                 }
             })
             ->addColumn('aksi', function ($row) {

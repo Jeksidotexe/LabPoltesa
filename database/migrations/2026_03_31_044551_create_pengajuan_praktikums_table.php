@@ -21,7 +21,7 @@ return new class extends Migration
             $table->time('jam_mulai')->nullable();
             $table->time('jam_selesai')->nullable();
             $table->string('jobsheet', 255);
-            $table->enum('status', ['Menunggu Kaprodi', 'Ditolak Kaprodi', 'Menunggu Super Admin', 'Ditolak Super Admin', 'Disetujui'])->default('Menunggu Kaprodi');
+            $table->enum('status', ['Menunggu Kaprodi', 'Ditolak Kaprodi', 'Menunggu Super Admin', 'Ditolak Super Admin', 'Disetujui', 'Selesai'])->default('Menunggu Kaprodi');
             $table->text('catatan')->nullable();
             $table->timestamps();
 

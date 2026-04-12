@@ -70,7 +70,7 @@
                                     <label class="form-label text-dark font-weight-medium">Laboratorium <span
                                             class="text-danger">*</span></label>
                                     <select class="form-control select2 @error('id_lab') is-invalid @enderror"
-                                        name="id_lab" required>
+                                        name="id_lab" id="id_lab" required>
                                         <option value="" disabled selected>-- Pilih Lab --</option>
                                         @foreach ($lab as $l)
                                             <option value="{{ $l->id_lab }}"
@@ -105,7 +105,7 @@
                             </div>
                         </div>
 
-                        <div class="row pb-2">
+                        <div class="row border-bottom pb-4 mb-4">
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
                                     <label class="form-label text-dark font-weight-medium">Tanggal Pelaksanaan <span
@@ -156,6 +156,33 @@
                                     @error('jam_selesai')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- SEKSI PEMINJAMAN ALAT DINAMIS --}}
+                        <div class="row border-bottom pb-4 mb-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <label class="form-label text-dark font-weight-bold m-0">
+                                        <i class="fas fa-boxes text-info mr-2"></i> Peminjaman Alat <small
+                                            class="text-muted font-weight-normal">(Opsional)</small>
+                                    </label>
+                                    <button type="button"
+                                        class="btn btn-sm btn-dark d-none"
+                                        id="btn-tambah-alat">
+                                        <i class="fas fa-plus mr-1"></i> Tambah Alat Lain
+                                    </button>
+                                </div>
+
+                                {{-- Alert Info Awal --}}
+                                <div id="alert-pilih-lab" class="alert alert-light border font-13 mb-3">
+                                    <i class="fas fa-info-circle mr-1 text-info"></i> Silakan pilih Laboratorium terlebih
+                                    dahulu untuk menampilkan daftar alat yang tersedia di ruangan tersebut.
+                                </div>
+
+                                <div id="container-alat">
+                                    {{-- Baris Alat Dinamis Akan Muncul Di Sini --}}
                                 </div>
                             </div>
                         </div>
@@ -213,8 +240,8 @@
                         </div>
 
                         <div class="form-actions mt-4 pt-3 text-right">
-                            <button type="submit" class="btn btn-sm btn-success font-weight-medium"><i
-                                    class="fa fa-paper-plane mr-1"></i> Kirim Pengajuan</button>
+                            <button type="submit" class="btn btn-sm btn-success font-weight-medium px-4"><i
+                                    class="fa fa-paper-plane mr-2"></i> Kirim Pengajuan</button>
                         </div>
                     </form>
                 </div>
@@ -245,7 +272,6 @@
         .drag-drop-zone:hover,
         .drag-drop-zone.dragover {
             background-color: #fff5f5;
-            /* Sentuhan merah muda tipis untuk PDF */
             border-color: #dc3545;
         }
 
@@ -263,6 +289,9 @@
 
     <script>
         $(document).ready(function() {
+            // Data Master Alat dilempar dari Controller
+            const dataAlatMaster = @json($alat);
+
             $('.select2').select2({
                 theme: "bootstrap-5",
                 width: '100%'
@@ -275,7 +304,7 @@
             flatpickr(".datepicker", {
                 dateFormat: "Y-m-d",
                 locale: "id",
-                minDate: minDate, // Mengunci agar tanggal sebelum H+7 tidak bisa diklik
+                minDate: minDate,
                 allowInput: true
             });
 
@@ -287,6 +316,103 @@
                 time_24hr: true,
                 allowInput: true
             });
+
+            // ==========================================
+            // LOGIKA TAMBAH ALAT DINAMIS (LEBIH CLEAN)
+            // ==========================================
+            function tambahRowAlat(selectedLab, isFirstRow = false) {
+                let alatTersedia = dataAlatMaster.filter(a => a.id_lab == selectedLab);
+
+                if (alatTersedia.length === 0) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Kosong',
+                        text: 'Tidak ada alat yang tersedia (Kondisi Baik) di Lab ini saat ini.'
+                    });
+                    return;
+                }
+
+                let optionsHtml = '<option value="" disabled selected>-- Pilih Alat --</option>';
+                alatTersedia.forEach(a => {
+                    // Menghapus tulisan sisa stok dari text option agar terlihat bersih
+                    optionsHtml +=
+                        `<option value="${a.id_alat}" data-stok="${a.jumlah}">${a.nama_alat}</option>`;
+                });
+
+                let rowHtml = `
+                <div class="row align-items-start mb-3 item-alat p-3 border mx-0">
+                    <div class="col-md-6 mb-2 mb-md-0">
+                        <label class="font-12 font-weight-medium text-uppercase">Nama Alat</label>
+                        <select class="form-control select-alat" name="id_alat[]" ${isFirstRow ? '' : 'required'}>
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-2 mb-md-0">
+                        <label class="font-12 font-weight-medium text-uppercase">Jumlah Pinjam</label>
+                        <div class="d-flex align-items-center">
+                            <input type="number" class="form-control input-jumlah mr-2" name="jumlah_pinjam[]" min="1" placeholder="0" style="max-width: 100px;" ${isFirstRow ? '' : 'required'}>
+                            <span class="badge bg-white border border-dark text-dark info-stok d-none">Stok Tersedia: <span class="stok-value font-weight-bold">0</span> Unit</span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mt-4 text-right">
+                        <button type="button" class="btn btn-outline-danger btn-sm btn-hapus-alat"><i class="fas fa-trash"></i> Hapus</button>
+                    </div>
+                </div>`;
+
+                $('#container-alat').append(rowHtml);
+                $('.select-alat').select2({
+                    theme: "bootstrap-5",
+                    width: '100%'
+                });
+            }
+
+            // Trigger saat Laboratorium diubah
+            $('#id_lab').change(function() {
+                let selectedLab = $(this).val();
+
+                // Kosongkan container alat jika lab diganti
+                $('#container-alat').empty();
+
+                if (selectedLab) {
+                    $('#alert-pilih-lab').slideUp('fast');
+                    $('#btn-tambah-alat').removeClass('d-none');
+
+                    // Tambah 1 baris otomatis saat lab pertama kali dipilih
+                    tambahRowAlat(selectedLab, true);
+                }
+            });
+
+            // Trigger saat tombol tambah alat lain di klik manual
+            $('#btn-tambah-alat').click(function() {
+                let selectedLab = $('#id_lab').val();
+                if (selectedLab) {
+                    tambahRowAlat(selectedLab, false);
+                }
+            });
+
+            // Hapus Row Alat
+            $(document).on('click', '.btn-hapus-alat', function() {
+                $(this).closest('.item-alat').remove();
+            });
+
+            // Validasi Input Jumlah Maksimal & Munculkan Badge Stok
+            $(document).on('change', '.select-alat', function() {
+                let maxStok = $(this).find(':selected').data('stok');
+                let container = $(this).closest('.item-alat');
+                let inputJumlah = container.find('.input-jumlah');
+                let badgeStok = container.find('.info-stok');
+
+                // Set atribut required & max secara dinamis
+                $(this).prop('required', true);
+                inputJumlah.prop('required', true);
+
+                inputJumlah.attr('max', maxStok).val(1);
+
+                // Tampilkan badge stok yang ada disebelah input angka
+                badgeStok.removeClass('d-none');
+                badgeStok.find('.stok-value').text(maxStok);
+            });
+
 
             // ==========================================
             // LOGIKA DRAG & DROP FILE PDF
@@ -321,21 +447,18 @@
                 if (fileInput.files && fileInput.files[0]) {
                     const file = fileInput.files[0];
 
-                    // Validasi PDF
                     if (file.type !== "application/pdf") {
                         alert('Format file tidak didukung! Harap unggah file PDF.');
                         fileInput.value = '';
                         return;
                     }
 
-                    // Validasi Ukuran (Maks 5MB = 5242880 bytes)
                     if (file.size > 5242880) {
                         alert('Ukuran file terlalu besar! Maksimal 5MB.');
                         fileInput.value = '';
                         return;
                     }
 
-                    // Menampilkan Nama dan Ukuran File
                     fileNameDisplay.textContent = file.name;
 
                     let sizeKB = file.size / 1024;
@@ -345,7 +468,6 @@
                         fileSizeDisplay.textContent = sizeKB.toFixed(2) + ' KB';
                     }
 
-                    // Ubah Tampilan UI
                     dropZone.classList.add('d-none');
                     previewContainer.classList.remove('d-none');
                     previewContainer.classList.add('d-block');

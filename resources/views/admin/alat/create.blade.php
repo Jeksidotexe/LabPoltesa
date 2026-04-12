@@ -74,9 +74,9 @@
                             </div>
                         </div>
 
-                        {{-- Baris 2: Tahun & Jumlah --}}
+                        {{-- Baris 2: Tahun, Jumlah, Kondisi --}}
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group mb-4">
                                     <label class="form-label text-dark font-weight-medium">Tahun Pengadaan <span
                                             class="text-danger">*</span></label>
@@ -88,13 +88,30 @@
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group mb-4">
                                     <label class="form-label text-dark font-weight-medium">Jumlah Unit <span
                                             class="text-danger">*</span></label>
                                     <input type="number" class="form-control @error('jumlah') is-invalid @enderror"
                                         name="jumlah" min="1" required>
                                     @error('jumlah')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-4">
+                                    <label class="form-label text-dark font-weight-medium">Kondisi Alat <span
+                                            class="text-danger">*</span></label>
+                                    <select class="form-control select2" name="kondisi" required>
+                                        <option value="Baik" {{ old('kondisi') == 'Baik' ? 'selected' : '' }}>Baik
+                                        </option>
+                                        <option value="Rusak Ringan"
+                                            {{ old('kondisi') == 'Rusak Ringan' ? 'selected' : '' }}>Rusak Ringan</option>
+                                        <option value="Rusak Berat"
+                                            {{ old('kondisi') == 'Rusak Berat' ? 'selected' : '' }}>Rusak Berat</option>
+                                    </select>
+                                    @error('kondisi')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

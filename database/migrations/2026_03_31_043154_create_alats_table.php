@@ -19,6 +19,9 @@ return new class extends Migration
             $table->text('instruksi_kerja');
             $table->year('tahun_pengadaan');
             $table->integer('jumlah');
+            $table->integer('jumlah_rusak_ringan')->default(0);
+            $table->integer('jumlah_rusak_berat')->default(0);
+            $table->enum('kondisi', ['Baik', 'Rusak Ringan', 'Rusak Berat'])->default('Baik');
             $table->string('foto', 2048)->nullable();
             $table->timestamps();
 

@@ -25,9 +25,6 @@
                                     <input class="form-control @error('username') is-invalid @enderror" type="text"
                                         id="username" name="username" value="{{ old('username') }}"
                                         placeholder="Masukkan username">
-                                    @error('username')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
                             </div>
                             <div class="col-lg-12">
@@ -44,19 +41,15 @@
                                             <i class="fa fa-eye"></i>
                                         </span>
                                     </div>
-                                    @error('password')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
                                 </div>
                             </div>
                             <div class="col-lg-12 text-center mt-3">
-                                <button type="submit" class="btn btn-block btn-primary"
-                                    style="border-radius: 8px;">
+                                <button type="submit" class="btn btn-block btn-primary" style="border-radius: 8px;">
                                     <i class="fas fa-sign-in-alt mr-1"></i> Masuk
                                 </button>
                             </div>
                             <div class="col-lg-12 text-center mt-4">
-                                Belum punya akun? <a href="#" class="text-primary">Register</a>
+                                Belum punya akun? <a href="{{ route('register') }}" class="text-primary">Register</a>
                             </div>
                         </div>
                     </form>
@@ -69,7 +62,6 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            // Logika Toggle Hide/Show Password
             $('.toggle-password').click(function() {
                 let targetInput = $($(this).data('target'));
                 let icon = $(this).find('i');

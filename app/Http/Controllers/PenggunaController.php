@@ -160,6 +160,7 @@ class PenggunaController extends Controller
                     'telepon'           => $validatedData['telepon'],
                     'tanggal_bergabung' => $validatedData['tanggal_bergabung'],
                     'status'            => $validatedData['status'],
+                    'email_verified_at' => $validatedData['status'] === 'Aktif' ? now() : null,
                     'foto'              => $fotoPath,
                 ]);
             });
@@ -302,6 +303,29 @@ class PenggunaController extends Controller
         } catch (\Exception $e) {
             Log::error('Error deleting user: ' . $e->getMessage());
             return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
+        }
+    }
+
+    public function toggleStatus(string $id): RedirectResponse
+    {
+        try {
+            $pengguna = User::findOrFail($id);
+            if ($pengguna->status === 'Aktif') {
+                $pengguna->status = 'Nonaktif';
+            } else {
+                $pengguna->status = 'Aktif';
+                if (is_null($pengguna->email_verified_at)) {
+                    $pengguna->email_verified_at = now();
+                }
+            }
+
+            $pengguna->save();
+
+            $pesan = $pengguna->status === 'Aktif' ? 'Akun berhasil diaktifkan.' : 'Akun berhasil dinonaktifkan.';
+            return redirect()->back()->with('success', $pesan);
+        } catch (\Exception $e) {
+            Log::error('Error toggle status user: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengubah status akun.');
         }
     }
 }

@@ -91,12 +91,31 @@
                                 </div>
                             </div>
 
-                            {{-- Tombol Edit Profil --}}
+                            {{-- Tombol Aksi --}}
                             <div class="w-100">
                                 <a href="{{ route('pengguna.edit', $pengguna->id) }}"
-                                    class="btn btn-sm btn-primary btn-block font-weight-bold">
+                                    class="btn btn-sm btn-primary btn-block font-weight-bold mb-2">
                                     <i data-feather="edit-2" class="mr-2" style="width: 16px;"></i> Edit Pengguna
                                 </a>
+
+                                {{-- TAMBAHAN: Tombol Aktivasi / Nonaktifkan --}}
+                                <form action="{{ route('pengguna.toggleStatus', $pengguna->id) }}" method="POST"
+                                    id="form-toggle-status">
+                                    @csrf
+                                    @if ($pengguna->status == 'Nonaktif')
+                                        <button type="button" class="btn btn-sm btn-success btn-block font-weight-bold"
+                                            onclick="confirmToggle('Aktivasi')">
+                                            <i data-feather="check-circle" class="mr-2" style="width: 16px;"></i> Aktivasi
+                                            Akun
+                                        </button>
+                                    @else
+                                        <button type="button" class="btn btn-sm btn-danger btn-block font-weight-bold"
+                                            onclick="confirmToggle('Nonaktifkan')">
+                                            <i data-feather="slash" class="mr-2" style="width: 16px;"></i> Nonaktifkan
+                                            Akun
+                                        </button>
+                                    @endif
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -112,7 +131,6 @@
                                 <i class="fas fa-shield-alt text-primary mr-2"></i> Informasi Akun
                             </h5>
                             <div class="row">
-                                {{-- Ubah col-sm-6 menjadi col-sm-4 agar dibagi 3 sebaris --}}
                                 <div class="col-sm-4 mb-4 mb-sm-0">
                                     <small class="text-muted font-13 font-weight-medium d-block mb-1">Username Login</small>
                                     <span class="text-primary font-15 font-weight-bold">{{ $pengguna->username }}</span>
@@ -125,13 +143,11 @@
                                 <div class="col-sm-4 mb-4 mb-sm-0">
                                     <small class="text-muted font-13 font-weight-medium d-block mb-1">Status</small>
                                     @if (($pengguna->status ?? 'Aktif') == 'Aktif')
-                                        <span
-                                            class="badge badge-success px-3 py-1 font-12 font-weight-medium">
+                                        <span class="badge badge-success px-3 py-1 font-12 font-weight-medium">
                                             <i class="fas fa-check-circle mr-1"></i> Aktif
                                         </span>
                                     @else
-                                        <span
-                                            class="badge badge-danger px-3 py-1 font-12 font-weight-medium">
+                                        <span class="badge badge-danger px-3 py-1 font-12 font-weight-medium">
                                             <i class="fas fa-times-circle mr-1"></i> Nonaktif
                                         </span>
                                     @endif
@@ -235,11 +251,41 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
             if (typeof feather !== 'undefined') {
                 feather.replace();
             }
         });
+
+        // Logika SweetAlert2 dengan tombol Bootstrap btn-sm dan Ikon
+        function confirmToggle(action) {
+            let actionText = action.toLowerCase();
+
+            // Tentukan class warna dan ikon berdasarkan aksi
+            let btnClass = action === 'Aktivasi' ? 'btn-success' : 'btn-danger';
+            let btnIcon = action === 'Aktivasi' ? '<i class="fas fa-check-circle mr-1"></i> ' :
+                '<i class="fas fa-slash mr-1"></i> ';
+
+            Swal.fire({
+                title: "Konfirmasi " + action,
+                text: "Apakah Anda yakin ingin " + actionText + " akun pengguna ini?",
+                icon: "warning",
+                showCancelButton: true,
+                buttonsStyling: false, // Mematikan desain bawaan SweetAlert
+                customClass: {
+                    confirmButton: 'btn btn-sm ' + btnClass + ' mr-2 font-weight-medium',
+                    cancelButton: 'btn btn-sm btn-secondary font-weight-medium'
+                },
+                // Menyisipkan HTML Ikon langsung ke teks tombol
+                confirmButtonText: btnIcon + "Ya, " + action + "!",
+                cancelButtonText: '<i class="fas fa-times mr-1"></i> Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('form-toggle-status').submit();
+                }
+            });
+        }
     </script>
 @endpush

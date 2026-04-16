@@ -8,8 +8,10 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('master') }}/assets/images/favicon.png">
-    <title>Silakan Login - LabPoltesa</title>
+    <title>Silakan Login - LabAgrobisnisPoltesa</title>
     <link href="{{ asset('master') }}/dist/css/style.min.css" rel="stylesheet">
+    {{-- CSS SweetAlert2 --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 
 <body>
@@ -22,11 +24,66 @@
         </div>
         @yield('login')
     </div>
+
     <script src="{{ asset('master') }}/assets/libs/jquery/dist/jquery.min.js "></script>
     <script src="{{ asset('master') }}/assets/libs/popper.js/dist/umd/popper.min.js "></script>
     <script src="{{ asset('master') }}/assets/libs/bootstrap/dist/js/bootstrap.min.js "></script>
+    {{-- JS SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         $(".preloader ").fadeOut();
+
+        // Konfigurasi Global SweetAlert2
+        $(document).ready(function() {
+            const swalCustom = Swal.mixin({
+                customClass: {
+                    // TAMBAHKAN btn-sm DI SINI
+                    confirmButton: 'btn btn-sm btn-primary font-weight-medium'
+                },
+                buttonsStyling: false
+            });
+
+            // 1. Menangkap session sukses (Contoh: Berhasil Registrasi)
+            @if (session('swal_success'))
+                swalCustom.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('swal_success') }}',
+                    customClass: {
+                        // Tambahkan btn-sm juga pada override warna
+                        confirmButton: 'btn btn-sm btn-success font-weight-medium'
+                    },
+                    confirmButtonText: '<i class="fas fa-check-circle mr-1"></i> Tutup'
+                });
+            @endif
+
+            // 2. Menangkap session error umum (Contoh: Gagal Simpan DB)
+            @if (session('swal_error'))
+                swalCustom.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ session('swal_error') }}',
+                    customClass: {
+                        confirmButton: 'btn btn-sm btn-danger font-weight-medium'
+                    },
+                    confirmButtonText: '<i class="fas fa-times-circle mr-1"></i> Coba Lagi'
+                });
+            @endif
+
+            // 3. Menangkap Session Peringatan (Akun Nonaktif)
+            @if (session('swal_warning'))
+                swalCustom.fire({
+                    icon: 'warning',
+                    title: 'Perhatian!',
+                    text: '{{ session('swal_warning') }}',
+                    customClass: {
+                        confirmButton: 'btn btn-sm btn-warning text-dark font-weight-medium'
+                    },
+                    confirmButtonText: '<i class="fas fa-info-circle mr-1"></i> Mengerti'
+                });
+            @endif
+        });
     </script>
 
     @stack('scripts')

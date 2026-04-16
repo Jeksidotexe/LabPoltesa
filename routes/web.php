@@ -11,6 +11,7 @@ use App\Http\Controllers\PengajuanPraktikumController;
 use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\ProgramStudiController;
+use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\RekapController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,9 +23,13 @@ Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
+Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('register', [RegisterController::class, 'register']);
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/pengajuan-data', [DashboardController::class, 'dataPengajuan'])->name('dashboard.pengajuan.data');
+    Route::get('/dashboard/aktivasi-data', [DashboardController::class, 'dataAktivasi'])->name('dashboard.aktivasi.data');
     Route::get('/pengajuan/detail/{id}', [PengajuanPraktikumController::class, 'show'])->name('pengajuan.show');
 
     Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
@@ -42,6 +47,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // === KHUSUS SUPER ADMIN ===
     Route::middleware(['role:Super Admin'])->group(function () {
         Route::get('/pengguna/data', [PenggunaController::class, 'data'])->name('pengguna.data');
+        Route::post('/pengguna/{id}/toggle-status', [PenggunaController::class, 'toggleStatus'])->name('pengguna.toggleStatus');
         Route::resource('/pengguna', PenggunaController::class);
 
         Route::get('/prodi/data', [ProgramStudiController::class, 'data'])->name('prodi.data');

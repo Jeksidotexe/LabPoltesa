@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('foto', 2048)->nullable();
             $table->date('tanggal_bergabung');
             $table->enum('status', ['Aktif', 'Nonaktif']);
-            // $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->foreignId('current_team_id')->nullable();
             // $table->string('profile_photo_path', 2048)->nullable();

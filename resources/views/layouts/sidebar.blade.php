@@ -48,22 +48,6 @@
                             <i data-feather="tag" class="feather-icon"></i><span class="hide-menu">Kategori</span>
                         </a>
                     </li>
-                    <li class="list-divider"></li>
-                    <li class="nav-small-cap"><span class="hide-menu">Kegiatan</span></li>
-                    <li class="sidebar-item {{ request()->routeIs('jadwal.*') ? 'selected' : '' }}">
-                        <a class="sidebar-link {{ request()->routeIs('jadwal.*') ? 'active' : '' }}"
-                            href="{{ route('jadwal.index') }}" aria-expanded="false">
-                            <i data-feather="calendar" class="feather-icon"></i><span class="hide-menu">Jadwal
-                                Praktikum</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-item {{ request()->routeIs('rekap.*') ? 'selected' : '' }}">
-                        <a class="sidebar-link {{ request()->routeIs('rekap.*') ? 'active' : '' }}"
-                            href="{{ route('rekap.index') }}" aria-expanded="false">
-                            <i data-feather="file-text" class="feather-icon"></i><span class="hide-menu">Rekap
-                                Kegiatan</span>
-                        </a>
-                    </li>
                 @endif
 
                 {{-- Menu Khusus Admin --}}
@@ -74,15 +58,6 @@
                         <a class="sidebar-link {{ request()->routeIs('alat.*') ? 'active' : '' }}"
                             href="{{ route('alat.index') }}">
                             <i data-feather="box" class="feather-icon"></i><span class="hide-menu">Data Alat</span>
-                        </a>
-                    </li>
-                    <li class="list-divider"></li>
-                    <li class="nav-small-cap"><span class="hide-menu">Kegiatan</span></li>
-                    <li class="sidebar-item {{ request()->routeIs('rekap.*') ? 'selected' : '' }}">
-                        <a class="sidebar-link {{ request()->routeIs('rekap.*') ? 'active' : '' }}"
-                            href="{{ route('rekap.index') }}" aria-expanded="false">
-                            <i data-feather="file-text" class="feather-icon"></i><span class="hide-menu">Rekap
-                                Kegiatan</span>
                         </a>
                     </li>
                 @endif
@@ -108,23 +83,23 @@
                     </li>
                 @endif
 
-                {{-- Menu Khusus Kaprodi --}}
-                @if (auth()->user()->role == 'Kaprodi')
-                    <li class="list-divider"></li>
-                    <li class="nav-small-cap"><span class="hide-menu">Kegiatan</span></li>
-                    <li class="sidebar-item {{ request()->routeIs('rekap.*') ? 'selected' : '' }}">
-                        <a class="sidebar-link {{ request()->routeIs('rekap.*') ? 'active' : '' }}"
-                            href="{{ route('rekap.index') }}" aria-expanded="false">
-                            <i data-feather="file-text" class="feather-icon"></i><span class="hide-menu">Rekap
-                                Kegiatan</span>
-                        </a>
-                    </li>
-                @endif
+                {{-- ======================================================== --}}
+                {{-- MENU KEGIATAN (GLOBAL UNTUK SEMUA DI BAWAH MENU KHUSUS)  --}}
+                {{-- ======================================================== --}}
+                <li class="list-divider"></li>
+                <li class="nav-small-cap"><span class="hide-menu">Kegiatan</span></li>
 
-                {{-- Menu Khusu Kajur --}}
-                @if (auth()->user()->role == 'Kajur')
-                    <li class="list-divider"></li>
-                    <li class="nav-small-cap"><span class="hide-menu">Kegiatan</span></li>
+                {{-- Jadwal Praktikum (Dapat diakses semua pengguna) --}}
+                <li class="sidebar-item {{ request()->routeIs('jadwal.*') ? 'selected' : '' }}">
+                    <a class="sidebar-link {{ request()->routeIs('jadwal.*') ? 'active' : '' }}"
+                        href="{{ route('jadwal.index') }}" aria-expanded="false">
+                        <i data-feather="calendar" class="feather-icon"></i><span class="hide-menu">Jadwal
+                            Praktikum</span>
+                    </a>
+                </li>
+
+                {{-- Rekap Kegiatan (Hanya dapat diakses oleh selain Dosen) --}}
+                @if (in_array(auth()->user()->role, ['Super Admin', 'Admin', 'Kaprodi', 'Kajur']))
                     <li class="sidebar-item {{ request()->routeIs('rekap.*') ? 'selected' : '' }}">
                         <a class="sidebar-link {{ request()->routeIs('rekap.*') ? 'active' : '' }}"
                             href="{{ route('rekap.index') }}" aria-expanded="false">

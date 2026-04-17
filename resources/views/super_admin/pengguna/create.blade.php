@@ -118,10 +118,9 @@
 
                                 <div class="row">
                                     <div class="col-md-4 form-group mb-4">
-                                        <label class="form-label text-dark font-weight-medium">Program Studi <span
-                                                class="text-danger">*</span></label>
+                                        <label class="form-label text-dark font-weight-medium">Program Studi</label>
                                         <select class="form-control select2" name="id_prodi">
-                                            <option value="" selected>Tidak Ada Program Studi</option>
+                                            <option value="" selected>Pilih Program Studi</option>
                                             @foreach ($prodi as $p)
                                                 <option value="{{ $p->id_prodi }}"
                                                     {{ old('id_prodi') == $p->id_prodi ? 'selected' : '' }}>

@@ -139,7 +139,7 @@
                 confirmButtonText: '<i class="fas fa-check-circle"></i> Ya, hapus!',
                 cancelButtonText: '<i class="fas fa-times"></i> Batal',
                 customClass: {
-                    confirmButton: 'btn btn-sm btn-danger me-2',
+                    confirmButton: 'btn btn-sm btn-danger me-2 mr-2',
                     cancelButton: 'btn btn-sm btn-secondary ms-2',
                 },
                 buttonsStyling: false

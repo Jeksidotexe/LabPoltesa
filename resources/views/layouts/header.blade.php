@@ -9,8 +9,8 @@
                         <img src="{{ asset('poltesa.png') }}" height="60" alt="logo" class="dark-logo" />
                         <img src="{{ asset('poltesa.png') }}" height="60" alt="logo" class="light-logo" />
                     </b>
-                    <span class="logo-text mt-3 ml-2 font-weight-bold text-dark font-12">
-                        LabAgrobisnisPOLTESA
+                    <span class="logo-text mt-3 font-weight-bold text-dark font-14">
+                        LabAgrobisnisPoltesa
                     </span>
                 </a>
             </div>
@@ -62,28 +62,31 @@
                     @php
                         $user = auth()->user();
                         $namaTampil = $user->nama ?? $user->role;
-                        $hasFoto = $user->foto;
+
+                        // LOGIKA FOTO PROFIL & FALLBACK UI-AVATARS
+                        if ($user->foto && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->foto)) {
+                            $urlFoto = \Illuminate\Support\Facades\Storage::url($user->foto);
+                        } else {
+                            $namaFallback = $user->nama ?? $user->role;
+                            $urlFoto =
+                                'https://ui-avatars.com/api/?name=' .
+                                urlencode($namaFallback) .
+                                '&background=e9ecef&color=343a40&size=140';
+                        }
                     @endphp
 
                     <a class="nav-link dropdown-toggle" href="javascript:void(0)" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">
 
-                        {{-- Logika Tampilan Foto vs Inisial --}}
-                        @if ($hasFoto)
-                            <img src="{{ Storage::url($user->foto) }}" alt="user" class="rounded-circle border"
-                                width="40" height="40" style="object-fit: cover;">
-                        @else
-                            <div class="bg-primary text-white rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm border"
-                                style="width: 40px; height: 40px; font-size: 18px; border-width: 2px !important;">
-                                {{ strtoupper(substr($user->nama, 0, 1)) }}
-                            </div>
-                        @endif
+                        {{-- Tampilan Foto Profil --}}
+                        <img src="{{ $urlFoto }}" alt="user" class="rounded-circle border" width="40"
+                            height="40" style="object-fit: cover;">
 
                         <span class="ml-2 d-none d-lg-inline-block"><span class="text-dark">{{ $namaTampil }}</span>
                             <i data-feather="chevron-down" class="svg-icon"></i></span>
                     </a>
 
-                    <ddiv class="dropdown-menu dropdown-menu-right user-dd animated flipInY">
+                    <div class="dropdown-menu dropdown-menu-right user-dd animated flipInY">
                         <a class="dropdown-item" href="{{ route('profil.show') }}"><i data-feather="user"
                                 class="svg-icon mr-2 ml-1"></i>
                             Profil Saya</a>
@@ -99,7 +102,7 @@
                                 <span class="hide-menu">Logout</span>
                             </a>
                         </div>
-                    </ddiv>
+                    </div>
                 </li>
             </ul>
         </div>

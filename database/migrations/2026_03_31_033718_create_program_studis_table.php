@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('id_prodi');
             $table->string('kode', 20);
             $table->string('nama_prodi', 100);
-            $table->string('akreditasi', 5);
+            $table->string('akreditasi', 35);
             $table->date('tanggal_berdiri');
             $table->timestamps();
         });

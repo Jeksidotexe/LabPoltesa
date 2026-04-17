@@ -70,8 +70,8 @@
 
                         {{-- Logika Tampilan Foto vs Inisial --}}
                         @if ($hasFoto)
-                            <img src="{{ Storage::url($user->foto) }}" alt="user"
-                                class="rounded-circle border" width="40" height="40" style="object-fit: cover;">
+                            <img src="{{ Storage::url($user->foto) }}" alt="user" class="rounded-circle border"
+                                width="40" height="40" style="object-fit: cover;">
                         @else
                             <div class="bg-primary text-white rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm border"
                                 style="width: 40px; height: 40px; font-size: 18px; border-width: 2px !important;">
@@ -79,9 +79,8 @@
                             </div>
                         @endif
 
-                        <span class="ml-2 d-none d-lg-inline-block"><span>Hai,</span> <span
-                                class="text-dark">{{ $namaTampil }}</span> <i data-feather="chevron-down"
-                                class="svg-icon"></i></span>
+                        <span class="ml-2 d-none d-lg-inline-block"><span class="text-dark">{{ $namaTampil }}</span>
+                            <i data-feather="chevron-down" class="svg-icon"></i></span>
                     </a>
 
                     <ddiv class="dropdown-menu dropdown-menu-right user-dd animated flipInY">

@@ -159,7 +159,7 @@
                                             <div class="input-group">
                                                 <input type="text" class="form-control" name="gelar_depan"
                                                     value="{{ old('gelar_depan', $user->gelar_depan) }}">
-                                                <input type="text" class="form-control border-left-0"
+                                                <input type="text" class="form-control"
                                                     name="gelar_belakang"
                                                     value="{{ old('gelar_belakang', $user->gelar_belakang) }}">
                                             </div>

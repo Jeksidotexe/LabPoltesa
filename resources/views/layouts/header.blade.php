@@ -9,8 +9,8 @@
                         <img src="{{ asset('poltesa.png') }}" height="60" alt="logo" class="dark-logo" />
                         <img src="{{ asset('poltesa.png') }}" height="60" alt="logo" class="light-logo" />
                     </b>
-                    <span class="logo-text mt-3 ml-2 font-weight-bold text-dark">
-                        LabPoltesa
+                    <span class="logo-text mt-3 ml-2 font-weight-bold text-dark font-12">
+                        LabAgrobisnisPOLTESA
                     </span>
                 </a>
             </div>

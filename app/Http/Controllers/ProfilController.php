@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 
-class ProfilController extends Controller // Nama class diubah menjadi ProfilController
+class ProfilController extends Controller
 {
     // Halaman Detail Profil
     public function index()

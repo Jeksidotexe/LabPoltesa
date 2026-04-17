@@ -38,27 +38,25 @@
         $(document).ready(function() {
             const swalCustom = Swal.mixin({
                 customClass: {
-                    // TAMBAHKAN btn-sm DI SINI
                     confirmButton: 'btn btn-sm btn-primary font-weight-medium'
                 },
                 buttonsStyling: false
             });
 
-            // 1. Menangkap session sukses (Contoh: Berhasil Registrasi)
+            // 1. Menangkap session sukses
             @if (session('swal_success'))
                 swalCustom.fire({
                     icon: 'success',
                     title: 'Berhasil!',
                     text: '{{ session('swal_success') }}',
                     customClass: {
-                        // Tambahkan btn-sm juga pada override warna
                         confirmButton: 'btn btn-sm btn-success font-weight-medium'
                     },
                     confirmButtonText: '<i class="fas fa-check-circle mr-1"></i> Tutup'
                 });
             @endif
 
-            // 2. Menangkap session error umum (Contoh: Gagal Simpan DB)
+            // 2. Menangkap session error umum
             @if (session('swal_error'))
                 swalCustom.fire({
                     icon: 'error',

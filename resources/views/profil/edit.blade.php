@@ -33,9 +33,10 @@
                         <div class="card">
                             <div class="card-body p-4">
                                 <div class="text-center mb-4">
-                                    <div class="bg-light-primary text-primary rounded-circle d-inline-flex justify-content-center align-items-center mb-3"
+                                    <div class="bg-primary text-white rounded-circle d-inline-flex justify-content-center align-items-center mb-3"
                                         style="width: 70px; height: 70px;">
-                                        <i class="fas fa-user-edit fa-2x"></i>
+                                        {{-- Menggunakan Feather Icon 'edit' dengan ukuran disesuaikan --}}
+                                        <i data-feather="edit" style="width: 32px; height: 32px;"></i>
                                     </div>
                                     <h5 class="font-weight-bold text-dark">Perbarui Data Anda</h5>
                                     <p class="text-muted font-13">Pastikan data yang Anda masukkan sudah benar dan valid.
@@ -159,8 +160,7 @@
                                             <div class="input-group">
                                                 <input type="text" class="form-control" name="gelar_depan"
                                                     value="{{ old('gelar_depan', $user->gelar_depan) }}">
-                                                <input type="text" class="form-control"
-                                                    name="gelar_belakang"
+                                                <input type="text" class="form-control" name="gelar_belakang"
                                                     value="{{ old('gelar_belakang', $user->gelar_belakang) }}">
                                             </div>
                                         </div>

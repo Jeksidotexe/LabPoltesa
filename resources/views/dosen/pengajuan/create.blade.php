@@ -327,7 +327,7 @@
                     Swal.fire({
                         icon: 'info',
                         title: 'Kosong',
-                        text: 'Tidak ada alat yang tersedia (Kondisi Baik) di Lab ini saat ini.'
+                        text: 'Tidak ada alat yang tersedia di Lab ini saat ini.'
                     });
                     return;
                 }

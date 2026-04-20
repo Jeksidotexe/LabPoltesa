@@ -6,6 +6,7 @@ use App\Models\Laboratorium;
 use App\Models\PengajuanPraktikum;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class JadwalController extends Controller
 {
@@ -84,12 +85,16 @@ class JadwalController extends Controller
                 return substr($row->jam_mulai, 0, 5) . ' - ' . substr($row->jam_selesai, 0, 5) . ' WIB';
             })
             ->addColumn('aksi', function ($row) {
-                return '
-                <div class="d-flex justify-content-center">
-                    <a href="' . route('jadwal.show', $row->id_pengajuan) . '" class="btn btn-sm btn-info btn-rounded" title="Detail">
-                        <i class="fa fa-eye"></i></a>
-                        <a href="' . route('berita-acara.create', $row->id_pengajuan) . '" class="btn btn-rounded btn-sm btn-warning ml-2" title="Buat Berita Acara"><i class="fas fa-file-alt"></i></a>
-                </div>';
+                $btnDetail = '<a href="' . route('jadwal.show', $row->id_pengajuan) . '" class="btn btn-sm btn-info btn-rounded" title="Detail"><i class="fa fa-eye"></i></a>';
+
+                $btnBeritaAcara = '';
+
+                if (Auth::user()->role === 'Admin') {
+                    $btnBeritaAcara = '<a href="' . route('berita-acara.create', $row->id_pengajuan) . '" class="btn btn-rounded btn-sm btn-warning ml-2" title="Buat Berita Acara"><i class="fas fa-file-alt"></i></a>';
+                }
+
+                // Gabungkan tombol
+                return '<div class="d-flex justify-content-center">' . $btnDetail . $btnBeritaAcara . '</div>';
             })
             ->rawColumns(['tanggal', 'aksi'])
             ->make(true);

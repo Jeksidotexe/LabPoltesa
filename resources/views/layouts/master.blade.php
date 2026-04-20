@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title> @yield('title') | LabPoltesa</title>
+    <title> @yield('title') | LabAgrobisnisPoltesa</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @auth
         <meta name="user-id" content="{{ Auth::id() }}">

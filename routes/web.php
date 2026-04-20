@@ -71,6 +71,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('/alat', AlatController::class);
         Route::post('/alat/{id}/repair', [AlatController::class, 'repair'])->name('alat.repair');
         Route::post('/pengajuan/pengembalian/{id}', [PengajuanPraktikumController::class, 'returnPraktikum'])->name('pengajuan.return');
+
+        Route::get('/berita-acara/buat/{id?}', [App\Http\Controllers\BeritaAcaraController::class, 'create'])->name('berita-acara.create');
+    Route::post('/berita-acara/cetak', [App\Http\Controllers\BeritaAcaraController::class, 'print'])->name('berita-acara.print');
     });
 
     // === KHUSUS DOSEN ===

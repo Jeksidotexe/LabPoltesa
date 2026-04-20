@@ -88,6 +88,7 @@ class JadwalController extends Controller
                 <div class="d-flex justify-content-center">
                     <a href="' . route('jadwal.show', $row->id_pengajuan) . '" class="btn btn-sm btn-info btn-rounded" title="Detail">
                         <i class="fa fa-eye"></i></a>
+                        <a href="' . route('berita-acara.create', $row->id_pengajuan) . '" class="btn btn-rounded btn-sm btn-warning ml-2" title="Buat Berita Acara"><i class="fas fa-file-alt"></i></a>
                 </div>';
             })
             ->rawColumns(['tanggal', 'aksi'])

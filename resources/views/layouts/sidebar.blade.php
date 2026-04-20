@@ -60,6 +60,15 @@
                             <i data-feather="box" class="feather-icon"></i><span class="hide-menu">Data Alat</span>
                         </a>
                     </li>
+                    <li class="list-divider"></li>
+                    <li class="nav-small-cap"><span class="hide-menu">Dokumen</span></li>
+                    <li class="sidebar-item {{ request()->routeIs('berita-acara.*') ? 'selected' : '' }}">
+                        <a class="sidebar-link {{ request()->routeIs('berita-acara.*') ? 'active' : '' }}"
+                            href="{{ route('berita-acara.create') }}">
+                            <i data-feather="printer" class="feather-icon"></i><span class="hide-menu">Berita
+                                Acara</span>
+                        </a>
+                    </li>
                 @endif
 
                 {{-- Menu Khusus Dosen --}}

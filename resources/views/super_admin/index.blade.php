@@ -55,7 +55,7 @@
                         <div class="d-flex d-lg-flex d-md-block align-items-center">
                             <div>
                                 <h2 class="text-dark mb-1 font-weight-medium">{{ $lab_aktif }}</h2>
-                                <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Lab Aktif</h6>
+                                <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Laboratorium Aktif</h6>
                             </div>
                             <div class="ml-auto mt-md-3 mt-lg-0">
                                 <span class="opacity-7 text-info"><i data-feather="monitor"
@@ -87,7 +87,7 @@
                         <div class="d-flex d-lg-flex d-md-block align-items-center">
                             <div>
                                 <h2 class="text-danger mb-1 font-weight-medium">{{ $antrean_akun }}</h2>
-                                <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Menunggu Aktivasi</h6>
+                                <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Akun Menunggu Aktivasi</h6>
                             </div>
                             <div class="ml-auto mt-md-3 mt-lg-0">
                                 <span class="opacity-7 text-danger"><i data-feather="user-plus"

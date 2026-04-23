@@ -13,51 +13,78 @@
             color: #000;
         }
 
-        /* --- STYLING UNTUK KOP SURAT --- */
         .kop-header {
             border-bottom: 3px solid #000;
-            /* Garis tebal pemisah kop */
-            padding-bottom: 15px;
+            padding-bottom: 10px;
             margin-bottom: 20px;
-            text-align: center;
-            /* Memastikan fallback center */
         }
 
         .kop-table {
             margin: 0 auto;
-            /* Membuat keseluruhan blok (gambar+teks) berada tepat di tengah */
             width: auto;
-            /* Lebar tabel hanya mengikuti isi teks dan gambar */
             border-collapse: collapse;
         }
 
         .kop-table td {
             border: none !important;
-            /* Hilangkan garis kotak pada kop */
             padding: 0;
             vertical-align: middle;
         }
 
         .img-kop {
-            max-width: 90px;
-            /* Ukuran logo, bisa Anda sesuaikan */
+            max-width: 110px;
             height: auto;
-            margin-right: 25px;
-            /* Jarak antara logo dan teks */
+            margin-right: 20px;
         }
 
         .text-kop {
             text-align: center;
+            line-height: 1.1;
         }
 
-        .text-kop h4 {
-            margin: 0 0 5px 0;
+        .teks-kementerian {
+            font-size: 24px;
+            font-weight: normal;
+        }
+
+        .teks-poltesa {
             font-size: 20px;
-            text-transform: uppercase;
-            font-weight: 900;
+            font-weight: bold;
+            margin-top: 5px;
         }
 
-        /* --- STYLING UNTUK TABEL DATA --- */
+        .teks-jurusan {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 3px;
+        }
+
+        .teks-alamat {
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .teks-kontak {
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+        .teks-kontak a {
+            color: blue;
+            text-decoration: underline;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .judul-dokumen {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
         .table-data {
             width: 100%;
             border-collapse: collapse;
@@ -78,17 +105,17 @@
         }
 
         .table-data th {
-            background-color: #f2f2f2 !important;
+            background-color: #5cb0dd !important;
             -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
             text-align: center;
             font-weight: bold;
         }
 
-        /* Pengaturan Kertas Print */
         @media print {
             @page {
-                margin: 1.5cm;
-                size: A4 portrait;
+                margin: 10mm 15mm;
+                size: A4 landscape;
             }
 
             body {
@@ -100,28 +127,42 @@
 
 <body onload="window.print()">
 
+    {{-- KOP SURAT RESMI --}}
     <div class="kop-header">
         <table class="kop-table">
             <tr>
                 <td>
-                    <img src="{{ asset('poltesa.png') }}" alt="Logo" class="img-kop">
+                    <img src="{{ asset('LogoKop.jpg') }}" alt="Logo POLTESA" class="img-kop">
                 </td>
                 <td class="text-kop">
-                    <h4>REKAPITULASI KEGIATAN PRAKTIKUM</h4>
-                    <h4>LABORATORIUM</h4>
+                    <div class="teks-kementerian">KEMENTERIAN PENDIDIKAN TINGGI, SAINS,<br>DAN TEKNOLOGI</div>
+                    <div class="teks-poltesa">POLITEKNIK NEGERI SAMBAS</div>
+                    <div class="teks-jurusan">JURUSAN AGRIBISNIS</div>
+                    <div class="teks-alamat">Jl. Raya Sejangkung, Sambas, 79462 Kalimantan Barat</div>
+                    <div class="teks-kontak">
+                        Tel. 0562-6303123; Sel. 08115636111; Laman: <a
+                            href="http://www.poltesa.ac.id">www.poltesa.ac.id</a>; email: <a
+                            href="mailto:info@poltesa.ac.id">info@poltesa.ac.id</a>
+                    </div>
                 </td>
             </tr>
         </table>
     </div>
 
+    {{-- JUDUL DOKUMEN --}}
+    <div class="judul-dokumen">
+        REKAPITULASI KEGIATAN PRAKTIKUM
+    </div>
+
+    {{-- TABEL DATA --}}
     <table class="table-data">
         <thead>
             <tr>
                 <th width="1%">No</th>
-                <th width="10%">Tanggal Pelaksanaan</th>
-                <th width="25%">Mata Kuliah</th>
+                <th width="15%">Tanggal Pelaksanaan</th>
+                <th width="30%">Mata Kuliah</th>
                 <th width="25%">Prodi</th>
-                <th width="8%">Waktu Pelaksanaan</th>
+                <th width="10%">Waktu Pelaksanaan</th>
             </tr>
         </thead>
         <tbody>
@@ -141,13 +182,13 @@
                     </td>
 
                     {{-- Waktu Pelaksanaan --}}
-                    <td>
+                    <td style="text-align: center;">
                         {{ substr($row->jam_mulai, 0, 5) }} - {{ substr($row->jam_selesai, 0, 5) }} WIB
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" style="padding: 15px;">Belum ada data kegiatan praktikum.
+                    <td colspan="5" style="padding: 15px; text-align: center;">Belum ada data kegiatan praktikum.
                     </td>
                 </tr>
             @endforelse

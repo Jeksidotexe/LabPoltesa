@@ -46,7 +46,7 @@
                                     value="{{ $tanggal }}" {{ $tanggal ? 'readonly' : 'required' }}>
                             </div>
                             <div class="col-md-4 form-group">
-                                <label>Tempat Praktek</label>
+                                <label>Tempat Praktik</label>
                                 <input type="text" name="tempat" class="form-control" value="{{ $lab }}"
                                     {{ $lab ? 'readonly' : 'required' }}>
                             </div>

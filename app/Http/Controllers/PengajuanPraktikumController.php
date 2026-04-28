@@ -154,7 +154,7 @@ class PengajuanPraktikumController extends Controller
         $request->validate([
             'id_kategori'   => 'required|exists:kategori,id_kategori',
             'id_lab'        => 'required|exists:laboratorium,id_lab',
-            'id_makul'      => 'required|exists:mata_kuliah,id_makul',
+            'id_makul'      => 'nullable|exists:mata_kuliah,id_makul',
             'tanggal'       => 'required|date|after_or_equal:' . $minDate,
             'jam_mulai'     => 'required|date_format:H:i',
             'jam_selesai'   => 'required|date_format:H:i|after:jam_mulai',

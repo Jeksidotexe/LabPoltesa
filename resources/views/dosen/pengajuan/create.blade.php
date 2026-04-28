@@ -45,13 +45,14 @@
                     <form action="{{ route('pengajuan.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        <div class="row border-bottom pb-4 mb-4">
-                            <div class="col-md-4">
+                        <div class="row border-bottom pb-4 mb-4" style="transition: all 0.3s ease;">
+                            {{-- Menambahkan ID col_kategori dan col_lab agar bisa dimanipulasi lebarnya oleh JS --}}
+                            <div class="col-md-6" id="col_kategori" style="transition: all 0.3s ease;">
                                 <div class="form-group mb-3">
                                     <label class="form-label text-dark font-weight-medium">Kategori Praktikum <span
                                             class="text-danger">*</span></label>
                                     <select class="form-control select2 @error('id_kategori') is-invalid @enderror"
-                                        name="id_kategori" required>
+                                        name="id_kategori" id="id_kategori" required>
                                         <option value="" disabled selected>-- Pilih Kategori --</option>
                                         @foreach ($kategori as $k)
                                             <option value="{{ $k->id_kategori }}"
@@ -65,7 +66,7 @@
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6" id="col_lab" style="transition: all 0.3s ease;">
                                 <div class="form-group mb-3">
                                     <label class="form-label text-dark font-weight-medium">Laboratorium <span
                                             class="text-danger">*</span></label>
@@ -84,12 +85,13 @@
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-md-4">
+
+                            <div class="col-md-4 d-none" id="container_makul" style="transition: all 0.3s ease;">
                                 <div class="form-group mb-3">
                                     <label class="form-label text-dark font-weight-medium">Mata Kuliah Praktikum <span
                                             class="text-danger">*</span></label>
                                     <select class="form-control select2 @error('id_makul') is-invalid @enderror"
-                                        name="id_makul" required>
+                                        name="id_makul" id="id_makul">
                                         <option value="" disabled selected>-- Pilih Mata Kuliah --</option>
                                         @foreach ($makul as $m)
                                             <option value="{{ $m->id_makul }}"
@@ -168,14 +170,11 @@
                                         <i class="fas fa-boxes text-info mr-2"></i> Peminjaman Alat <small
                                             class="text-muted font-weight-normal">(Opsional)</small>
                                     </label>
-                                    <button type="button"
-                                        class="btn btn-sm btn-dark d-none"
-                                        id="btn-tambah-alat">
+                                    <button type="button" class="btn btn-sm btn-dark d-none" id="btn-tambah-alat">
                                         <i class="fas fa-plus mr-1"></i> Tambah Alat Lain
                                     </button>
                                 </div>
 
-                                {{-- Alert Info Awal --}}
                                 <div id="alert-pilih-lab" class="alert alert-light border font-13 mb-3">
                                     <i class="fas fa-info-circle mr-1 text-info"></i> Silakan pilih Laboratorium terlebih
                                     dahulu untuk menampilkan daftar alat yang tersedia di ruangan tersebut.
@@ -194,7 +193,6 @@
                                         class="form-label text-dark font-weight-medium border-top pt-4 d-block w-100">Upload
                                         Jobsheet<span class="text-danger">*</span></label>
 
-                                    {{-- Drag & Drop Area untuk PDF --}}
                                     <div class="drag-drop-zone custom-radius mt-2" id="dragDropZone">
                                         <div class="dz-message">
                                             <i class="far fa-file-pdf text-danger mb-2 fa-3x"></i>
@@ -211,7 +209,6 @@
                                         <div class="text-danger font-13 mt-2">{{ $message }}</div>
                                     @enderror
 
-                                    {{-- Area Preview Dokumen Terpilih --}}
                                     <div id="previewContainer" class="d-none mt-3 p-3 border custom-radius">
                                         <div class="d-flex align-items-center justify-content-between">
                                             <div class="d-flex align-items-center overflow-hidden">
@@ -254,7 +251,6 @@
             border-radius: 8px;
         }
 
-        /* Drag & Drop Zone Styles */
         .drag-drop-zone {
             border: 2px dashed #b8c2cc;
             background-color: #fcfcfc;
@@ -283,13 +279,11 @@
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    {{-- Flatpickr JS --}}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
 
     <script>
         $(document).ready(function() {
-            // Data Master Alat dilempar dari Controller
             const dataAlatMaster = @json($alat);
 
             $('.select2').select2({
@@ -297,18 +291,46 @@
                 width: '100%'
             });
 
-            // Variable Min Date dari Controller (Otomatis H+7)
+            // ==========================================
+            // LOGIKA FILTER MATA KULIAH BERDASARKAN KATEGORI
+            // ==========================================
+            $('#id_kategori').change(function() {
+                let kategoriTerpilih = $(this).find('option:selected').text().trim().toLowerCase();
+
+                if (kategoriTerpilih === 'praktikum mahasiswa') {
+                    // Munculkan input Makul dan jadikan mandatory
+                    $('#container_makul').removeClass('d-none');
+                    $('#id_makul').prop('required', true);
+
+                    // Kembalikan lebar grid menjadi 3 bagian (col-md-4)
+                    $('#col_kategori, #col_lab').removeClass('col-md-6').addClass('col-md-4');
+                } else {
+                    // Sembunyikan dan hilangkan required pada Makul
+                    $('#container_makul').addClass('d-none');
+                    $('#id_makul').prop('required', false).val('').trigger('change');
+
+                    // PERBAIKAN: Ekspansi Kategori & Lab agar memenuhi area kosong (col-md-6)
+                    $('#col_kategori, #col_lab').removeClass('col-md-4').addClass('col-md-6');
+                }
+            });
+
+            // Trigger saat load pertama kali
+            if ($('#id_kategori').val()) {
+                $('#id_kategori').trigger('change');
+            } else {
+                // By default tanpa pilihan, pastikan pakai form lebar (col-6) karena makul sembunyi
+                $('#col_kategori, #col_lab').addClass('col-md-6').removeClass('col-md-4');
+            }
+            // ==========================================
+
             const minDate = "{{ $minDate }}";
 
-            // Datepicker Flatpickr Init
             flatpickr(".datepicker", {
                 dateFormat: "Y-m-d",
                 locale: "id",
                 minDate: minDate,
                 allowInput: true
             });
-
-            // Timepicker Flatpickr Init
             flatpickr(".timepicker", {
                 enableTime: true,
                 noCalendar: true,
@@ -317,9 +339,6 @@
                 allowInput: true
             });
 
-            // ==========================================
-            // LOGIKA TAMBAH ALAT DINAMIS (LEBIH CLEAN)
-            // ==========================================
             function tambahRowAlat(selectedLab, isFirstRow = false) {
                 let alatTersedia = dataAlatMaster.filter(a => a.id_lab == selectedLab);
 
@@ -334,7 +353,6 @@
 
                 let optionsHtml = '<option value="" disabled selected>-- Pilih Alat --</option>';
                 alatTersedia.forEach(a => {
-                    // Menghapus tulisan sisa stok dari text option agar terlihat bersih
                     optionsHtml +=
                         `<option value="${a.id_alat}" data-stok="${a.jumlah}">${a.nama_alat}</option>`;
                 });
@@ -366,57 +384,38 @@
                 });
             }
 
-            // Trigger saat Laboratorium diubah
             $('#id_lab').change(function() {
                 let selectedLab = $(this).val();
-
-                // Kosongkan container alat jika lab diganti
                 $('#container-alat').empty();
 
                 if (selectedLab) {
                     $('#alert-pilih-lab').slideUp('fast');
                     $('#btn-tambah-alat').removeClass('d-none');
-
-                    // Tambah 1 baris otomatis saat lab pertama kali dipilih
                     tambahRowAlat(selectedLab, true);
                 }
             });
 
-            // Trigger saat tombol tambah alat lain di klik manual
             $('#btn-tambah-alat').click(function() {
                 let selectedLab = $('#id_lab').val();
-                if (selectedLab) {
-                    tambahRowAlat(selectedLab, false);
-                }
+                if (selectedLab) tambahRowAlat(selectedLab, false);
             });
 
-            // Hapus Row Alat
             $(document).on('click', '.btn-hapus-alat', function() {
                 $(this).closest('.item-alat').remove();
             });
 
-            // Validasi Input Jumlah Maksimal & Munculkan Badge Stok
             $(document).on('change', '.select-alat', function() {
                 let maxStok = $(this).find(':selected').data('stok');
                 let container = $(this).closest('.item-alat');
                 let inputJumlah = container.find('.input-jumlah');
                 let badgeStok = container.find('.info-stok');
 
-                // Set atribut required & max secara dinamis
                 $(this).prop('required', true);
-                inputJumlah.prop('required', true);
-
-                inputJumlah.attr('max', maxStok).val(1);
-
-                // Tampilkan badge stok yang ada disebelah input angka
-                badgeStok.removeClass('d-none');
-                badgeStok.find('.stok-value').text(maxStok);
+                inputJumlah.prop('required', true).attr('max', maxStok).val(1);
+                badgeStok.removeClass('d-none').find('.stok-value').text(maxStok);
             });
 
-
-            // ==========================================
-            // LOGIKA DRAG & DROP FILE PDF
-            // ==========================================
+            // File Drag Drop Logic
             const dropZone = document.getElementById('dragDropZone');
             const fileInput = document.getElementById('jobsheet');
             const previewContainer = document.getElementById('previewContainer');
@@ -446,13 +445,11 @@
             function handlePreview() {
                 if (fileInput.files && fileInput.files[0]) {
                     const file = fileInput.files[0];
-
                     if (file.type !== "application/pdf") {
                         alert('Format file tidak didukung! Harap unggah file PDF.');
                         fileInput.value = '';
                         return;
                     }
-
                     if (file.size > 5242880) {
                         alert('Ukuran file terlalu besar! Maksimal 5MB.');
                         fileInput.value = '';
@@ -460,13 +457,9 @@
                     }
 
                     fileNameDisplay.textContent = file.name;
-
                     let sizeKB = file.size / 1024;
-                    if (sizeKB > 1024) {
-                        fileSizeDisplay.textContent = (sizeKB / 1024).toFixed(2) + ' MB';
-                    } else {
-                        fileSizeDisplay.textContent = sizeKB.toFixed(2) + ' KB';
-                    }
+                    if (sizeKB > 1024) fileSizeDisplay.textContent = (sizeKB / 1024).toFixed(2) + ' MB';
+                    else fileSizeDisplay.textContent = sizeKB.toFixed(2) + ' KB';
 
                     dropZone.classList.add('d-none');
                     previewContainer.classList.remove('d-none');
@@ -476,9 +469,6 @@
 
             removeBtn.addEventListener('click', () => {
                 fileInput.value = '';
-                fileNameDisplay.textContent = 'nama_file.pdf';
-                fileSizeDisplay.textContent = '0 KB';
-
                 previewContainer.classList.remove('d-block');
                 previewContainer.classList.add('d-none');
                 dropZone.classList.remove('d-none');

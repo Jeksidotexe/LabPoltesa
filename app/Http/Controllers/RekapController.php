@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Laboratorium;
 use App\Models\PengajuanPraktikum;
 use App\Models\ProgramStudi;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,11 +20,10 @@ class RekapController extends Controller
             abort(403, 'Anda tidak memiliki akses ke halaman Rekap Kegiatan.');
         }
 
-        $totalKegiatan = PengajuanPraktikum::where('status', 'Disetujui')->count();
+        $totalKegiatan = PengajuanPraktikum::has('beritaAcara')->count();
         $totalLab = Laboratorium::count();
         $menungguVerifikasi = PengajuanPraktikum::whereIn('status', ['Menunggu Kaprodi', 'Menunggu Super Admin'])->count();
 
-        // Mengambil data prodi untuk dropdown filter
         $prodi = ProgramStudi::orderBy('nama_prodi', 'asc')->get();
 
         return view('rekap.index', compact('totalKegiatan', 'totalLab', 'menungguVerifikasi', 'prodi'));
@@ -31,9 +31,8 @@ class RekapController extends Controller
 
     public function dataKegiatan(Request $request)
     {
-        $query = PengajuanPraktikum::with(['user', 'lab', 'makul.prodi'])->orderBy('tanggal', 'desc');
+        $query = PengajuanPraktikum::has('beritaAcara')->with(['user', 'lab', 'makul.prodi', 'beritaAcara'])->orderBy('tanggal', 'desc');
 
-        // LOGIKA FILTER PROGRAM STUDI
         if ($request->has('id_prodi') && $request->id_prodi != '') {
             $query->whereHas('makul', function ($q) use ($request) {
                 $q->where('id_prodi', $request->id_prodi);
@@ -46,74 +45,56 @@ class RekapController extends Controller
             ->addColumn('checkbox', function ($row) {
                 return '<input type="checkbox" class="row-checkbox" value="' . $row->id_pengajuan . '" style="cursor: pointer; width: 16px; height: 16px;">';
             })
-            ->addColumn('dosen_nama', function ($row) {
-                // Logika menyusun nama lengkap dari tabel users langsung
-                if ($row->user) {
-                    if ($row->user->nama) {
-                        $namaLengkap = $row->user->nama;
-                        if ($row->user->gelar_depan) {
-                            $namaLengkap = $row->user->gelar_depan . ' ' . $namaLengkap;
-                        }
-                        if ($row->user->gelar_belakang) {
-                            $namaLengkap .= ', ' . $row->user->gelar_belakang;
-                        }
-                        return $namaLengkap;
-                    }
-                    return $row->user->username;
-                }
-                return '-';
-            })
-            ->addColumn('lab_nama', function ($row) {
-                return $row->lab ? $row->lab->nama : '-';
+            ->editColumn('tanggal', function ($row) {
+                return Carbon::parse($row->tanggal)->translatedFormat('l, d F Y');
             })
             ->addColumn('makul_nama', function ($row) {
                 return $row->makul ? $row->makul->nama : '-';
             })
-            ->addColumn('prodi_nama', function ($row) {
-                return $row->makul && $row->makul->prodi ? $row->makul->prodi->nama_prodi : '-';
+            ->addColumn('kelas', function ($row) {
+                $semester = $row->beritaAcara->semester ?? '-';
+                $prodi = $row->makul && $row->makul->prodi ? $row->makul->prodi->nama_prodi : '-';
+                return $semester . ' / ' . $prodi;
             })
-            ->editColumn('tanggal', function ($row) {
-                return \Carbon\Carbon::parse($row->tanggal)->translatedFormat('d F Y');
+            ->addColumn('dosen_nama', function ($row) {
+                if ($row->user) {
+                    $nama = $row->user->nama ?? $row->user->username;
+                    if ($row->user->gelar_depan) $nama = $row->user->gelar_depan . ' ' . $nama;
+                    if ($row->user->gelar_belakang) $nama .= ', ' . $row->user->gelar_belakang;
+                    return $nama;
+                }
+                return '-';
+            })
+            ->addColumn('teknisi', function ($row) {
+                return $row->beritaAcara->teknisi ?? '-';
+            })
+            ->addColumn('judul', function ($row) {
+                return $row->beritaAcara->judul_praktikum ?? '-';
             })
             ->addColumn('waktu', function ($row) {
                 return substr($row->jam_mulai, 0, 5) . ' - ' . substr($row->jam_selesai, 0, 5) . ' WIB';
             })
-            ->addColumn('status_badge', function ($row) {
-                $status = $row->status;
-                if ($status == 'Disetujui') {
-                    return '<span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-circle"></i> Telah Disetujui</span>';
-                } elseif (str_contains($status, 'Ditolak')) {
-                    return '<span class="badge bg-danger text-white px-2 py-1"><i class="fas fa-times-circle"></i> Ditolak</span>';
-                } else {
-                    return '<span class="badge bg-warning text-dark px-2 py-1"><i class="fas fa-sync-alt fa-spin"></i> Diproses</span>';
-                }
+            ->addColumn('keterangan', function ($row) {
+                return $row->beritaAcara->kejadian;
             })
-            ->addColumn('aksi', function ($row) {
-                return '<a href="' . route('pengajuan.show', $row->id_pengajuan) . '" class="btn btn-sm btn-info btn-rounded" title="Detail"><i class="fas fa-eye"></i></a>';
-            })
-            ->rawColumns(['checkbox', 'status_badge', 'aksi'])
+            ->rawColumns(['checkbox'])
             ->make(true);
     }
 
     public function cetak(Request $request)
     {
-        // Hapus relasi 'user.dosen' dan ganti menjadi 'user' saja
-        $query = PengajuanPraktikum::with(['user', 'lab', 'makul.prodi'])->orderBy('tanggal', 'desc');
+        $query = PengajuanPraktikum::has('beritaAcara')->with(['user', 'lab', 'makul.prodi', 'beritaAcara'])->orderBy('tanggal', 'desc');
 
-        // Jika ada spesifik baris yang dicentang
         if ($request->has('ids') && $request->ids != '') {
             $ids = explode(',', $request->ids);
             $query->whereIn('id_pengajuan', $ids);
-        }
-        // Jika tidak dicentang tapi tabel sedang difilter berdasarkan Prodi
-        elseif ($request->has('id_prodi') && $request->id_prodi != '') {
+        } elseif ($request->has('id_prodi') && $request->id_prodi != '') {
             $query->whereHas('makul', function ($q) use ($request) {
                 $q->where('id_prodi', $request->id_prodi);
             });
         }
 
         $dataRekap = $query->get();
-
         return view('rekap.cetak', compact('dataRekap'));
     }
 }

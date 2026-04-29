@@ -126,75 +126,74 @@
 </head>
 
 <body onload="window.print()">
-
-    {{-- KOP SURAT RESMI --}}
     <div class="kop-header">
         <table class="kop-table">
             <tr>
-                <td>
-                    <img src="{{ asset('LogoKop.jpg') }}" alt="Logo POLTESA" class="img-kop">
-                </td>
+                <td><img src="{{ asset('LogoKop.jpg') }}" alt="Logo POLTESA" class="img-kop"></td>
                 <td class="text-kop">
                     <div class="teks-kementerian">KEMENTERIAN PENDIDIKAN TINGGI, SAINS,<br>DAN TEKNOLOGI</div>
                     <div class="teks-poltesa">POLITEKNIK NEGERI SAMBAS</div>
                     <div class="teks-jurusan">JURUSAN AGRIBISNIS</div>
                     <div class="teks-alamat">Jl. Raya Sejangkung, Sambas, 79462 Kalimantan Barat</div>
-                    <div class="teks-kontak">
-                        Tel. 0562-6303123; Sel. 08115636111; Laman: <a
+                    <div class="teks-kontak">Tel. 0562-6303123; Sel. 08115636111; Laman: <a
                             href="http://www.poltesa.ac.id">www.poltesa.ac.id</a>; email: <a
-                            href="mailto:info@poltesa.ac.id">info@poltesa.ac.id</a>
-                    </div>
+                            href="mailto:info@poltesa.ac.id">info@poltesa.ac.id</a></div>
                 </td>
             </tr>
         </table>
     </div>
 
-    {{-- JUDUL DOKUMEN --}}
-    <div class="judul-dokumen">
-        REKAPITULASI KEGIATAN PRAKTIKUM
-    </div>
+    <div class="judul-dokumen">REKAPITULASI KEGIATAN PRAKTIKUM</div>
 
-    {{-- TABEL DATA --}}
     <table class="table-data">
         <thead>
             <tr>
-                <th width="1%">No</th>
-                <th width="15%">Tanggal Pelaksanaan</th>
-                <th width="30%">Mata Kuliah</th>
-                <th width="25%">Prodi</th>
-                <th width="10%">Waktu Pelaksanaan</th>
+                <th width="3%">No</th>
+                <th width="15%">Tanggal</th>
+                <th width="12%">Mata Kuliah</th>
+                <th width="10%">Semester/Kelas</th>
+                <th width="15%">Dosen Pengampu</th>
+                <th width="10%">Teknisi</th>
+                <th width="15%">Judul Praktikum</th>
+                <th width="10%">Alokasi Waktu</th>
+                <th width="10%">Keterangan</th>
             </tr>
         </thead>
         <tbody>
             @forelse($dataRekap as $index => $row)
+                @php
+                    $semester = $row->beritaAcara->semester ?? '-';
+                    $prodi = $row->makul && $row->makul->prodi ? $row->makul->prodi->nama_prodi : '-';
+                    $namaDosen = $row->user->nama ?? $row->user->username;
+                    if ($row->user->gelar_depan) {
+                        $namaDosen = $row->user->gelar_depan . ' ' . $namaDosen;
+                    }
+                    if ($row->user->gelar_belakang) {
+                        $namaDosen .= ', ' . $row->user->gelar_belakang;
+                    }
+                @endphp
                 <tr>
                     <td style="text-align: center;">{{ $index + 1 }}</td>
-
-                    {{-- Format Tanggal Lengkap dengan Hari --}}
+                    {{-- Tanggal lengkap menggunakan hari dan nama bulan penuh --}}
                     <td>{{ \Carbon\Carbon::parse($row->tanggal)->translatedFormat('l, d F Y') }}</td>
-
-                    {{-- Mata Kuliah --}}
                     <td>{{ $row->makul ? $row->makul->nama : '-' }}</td>
-
-                    {{-- Prodi --}}
-                    <td>
-                        {{ $row->makul && $row->makul->prodi ? $row->makul->prodi->nama_prodi : '-' }}
-                    </td>
-
-                    {{-- Waktu Pelaksanaan --}}
-                    <td style="text-align: center;">
-                        {{ substr($row->jam_mulai, 0, 5) }} - {{ substr($row->jam_selesai, 0, 5) }} WIB
-                    </td>
+                    <td style="text-align: center;">{{ $semester }} / {{ $prodi }}</td>
+                    <td>{{ $namaDosen }}</td>
+                    <td>{{ $row->beritaAcara->teknisi ?? '-' }}</td>
+                    <td>{{ $row->beritaAcara->judul_praktikum ?? '-' }}</td>
+                    <td style="text-align: center;">{{ substr($row->jam_mulai, 0, 5) }} -
+                        {{ substr($row->jam_selesai, 0, 5) }}</td>
+                    {{-- Membiarkan tabel keterangan benar-benar kosong jika tidak diisi --}}
+                    <td>{{ $row->beritaAcara->kejadian }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" style="padding: 15px; text-align: center;">Belum ada data kegiatan praktikum.
+                    <td colspan="9" style="padding: 15px; text-align: center;">Belum ada data Rekap (Berita Acara).
                     </td>
                 </tr>
             @endforelse
         </tbody>
     </table>
-
 </body>
 
 </html>

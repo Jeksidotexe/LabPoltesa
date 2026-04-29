@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AlatController;
+use App\Http\Controllers\BeritaAcaraController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\KategoriController;
@@ -72,8 +73,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/alat/{id}/repair', [AlatController::class, 'repair'])->name('alat.repair');
         Route::post('/pengajuan/pengembalian/{id}', [PengajuanPraktikumController::class, 'returnPraktikum'])->name('pengajuan.return');
 
-        Route::get('/berita-acara/buat/{id?}', [App\Http\Controllers\BeritaAcaraController::class, 'create'])->name('berita-acara.create');
-    Route::post('/berita-acara/cetak', [App\Http\Controllers\BeritaAcaraController::class, 'print'])->name('berita-acara.print');
+        Route::get('/berita-acara', [BeritaAcaraController::class, 'index'])->name('berita-acara.index');
+        Route::get('/berita-acara/data', [BeritaAcaraController::class, 'data'])->name('berita-acara.data');
+        Route::get('/berita-acara/buat/{id?}', [BeritaAcaraController::class, 'create'])->name('berita-acara.create');
+        Route::post('/berita-acara/cetak', [BeritaAcaraController::class, 'print'])->name('berita-acara.print');
     });
 
     // === KHUSUS DOSEN ===

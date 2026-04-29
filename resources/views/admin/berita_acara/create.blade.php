@@ -3,16 +3,26 @@
 @section('content')
     <div class="page-wrapper">
         <div class="page-breadcrumb mb-3">
-            <h4 class="page-title text-dark font-weight-bold mb-1">Form Berita Acara Praktikum</h4>
-            <p class="text-muted font-14">Data otomatis diambil dari jadwal. Dokumen tidak disimpan ke DB (Langsung Cetak).
-            </p>
+            <div class="row align-items-center">
+                <div class="col-md-6 col-8 align-self-center">
+                    <h4 class="page-title text-dark font-weight-bold mb-1">Form Berita Acara Praktikum</h4>
+                    <p class="text-muted font-14 mb-0">Data otomatis diambil dari jadwal. Form tidak disimpan penuh, hanya
+                        untuk cetak.</p>
+                </div>
+                <div class="col-md-6 col-4 align-self-center text-right">
+                    <a href="{{ route('berita-acara.index') }}" class="btn btn-sm btn-secondary font-weight-medium">
+                        <i class="fa fa-arrow-left mr-1"></i> Kembali
+                    </a>
+                </div>
+            </div>
         </div>
 
         <div class="container-fluid pb-5">
-            <div class="card shadow-sm custom-radius">
+            <div class="card">
                 <div class="card-body p-4">
                     <form action="{{ route('berita-acara.print') }}" method="POST" target="_blank" id="formBeritaAcara">
                         @csrf
+                        <input type="hidden" name="id_pengajuan" value="{{ $pengajuan ? $pengajuan->id_pengajuan : '' }}">
 
                         <h5 class="text-primary font-weight-bold border-bottom pb-2 mb-3"><i
                                 class="fas fa-file-alt mr-2"></i>Header Dokumen</h5>
@@ -52,7 +62,8 @@
                             </div>
                             <div class="col-md-4 form-group">
                                 <label>Semester <span class="text-danger">*</span></label>
-                                <input type="text" name="semester" class="form-control" required>
+                                <input type="text" name="semester" class="form-control" value="{{ $semester }}"
+                                    required>
                             </div>
                             <div class="col-md-4 form-group">
                                 <label>Mata Kuliah</label>
@@ -66,7 +77,8 @@
                             </div>
                             <div class="col-md-12 form-group">
                                 <label>Judul Praktikum <span class="text-danger">*</span></label>
-                                <input type="text" name="judul" class="form-control" required>
+                                <input type="text" name="judul" class="form-control" value="{{ $judul }}"
+                                    required>
                             </div>
                         </div>
 
@@ -76,7 +88,9 @@
                             <thead class="bg-secondary text-white">
                                 <tr>
                                     <th>Nama Alat</th>
+                                    <th width="10%" class="text-center">Jumlah</th>
                                     <th>Nama Bahan</th>
+                                    <th width="10%" class="text-center">Jumlah</th>
                                     <th width="50" class="text-center"><button type="button"
                                             class="btn btn-sm btn-primary" onclick="addAlatBahan()"><i
                                                 class="fas fa-plus"></i></button></th>
@@ -89,8 +103,14 @@
                                             <td><input type="text" name="alat[]"
                                                     class="form-control form-control-sm bg-light"
                                                     value="{{ $item->nama_alat }}" readonly tabindex="-1"></td>
-                                            <td><input type="text" name="bahan[]" class="form-control form-control-sm">
+                                            <td><input type="number" name="jml_alat[]"
+                                                    class="form-control form-control-sm bg-light text-center"
+                                                    value="{{ $item->pivot->jumlah_pinjam }}" readonly tabindex="-1">
                                             </td>
+                                            <td><input type="text" name="bahan[]"
+                                                    class="form-control form-control-sm"></td>
+                                            <td><input type="number" name="jml_bahan[]"
+                                                    class="form-control form-control-sm text-center"></td>
                                             <td class="text-center"><button type="button" class="btn btn-sm btn-danger"
                                                     onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
                                         </tr>
@@ -98,10 +118,14 @@
                                 @else
                                     @for ($i = 0; $i < 3; $i++)
                                         <tr>
-                                            <td><input type="text" name="alat[]" class="form-control form-control-sm">
-                                            </td>
-                                            <td><input type="text" name="bahan[]" class="form-control form-control-sm">
-                                            </td>
+                                            <td><input type="text" name="alat[]"
+                                                    class="form-control form-control-sm"></td>
+                                            <td><input type="number" name="jml_alat[]"
+                                                    class="form-control form-control-sm text-center"></td>
+                                            <td><input type="text" name="bahan[]"
+                                                    class="form-control form-control-sm"></td>
+                                            <td><input type="number" name="jml_bahan[]"
+                                                    class="form-control form-control-sm text-center"></td>
                                             <td class="text-center"><button type="button" class="btn btn-sm btn-danger"
                                                     onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
                                         </tr>
@@ -124,7 +148,6 @@
                             </div>
                         </div>
 
-                        {{-- AREA DRAG & DROP EXCEL --}}
                         <div class="row mb-4">
                             <div class="col-md-12">
                                 <label class="font-weight-bold text-dark mb-2">Import Daftar Seluruh Mahasiswa</label>
@@ -143,14 +166,12 @@
                             </div>
                         </div>
 
-                        {{-- PREVIEW TABEL HASIL IMPORT --}}
                         <div id="previewContainer" class="d-none mb-4">
                             <div
                                 class="d-flex justify-content-between align-items-center bg-light border border-bottom-0 px-3 py-2 rounded-top">
-                                <h6 class="font-weight-bold text-dark m-0">
-                                    <i class="fas fa-list-ol text-primary mr-2"></i>Pratinjau Data (<span
-                                        id="previewCount">0</span> Mahasiswa)
-                                </h6>
+                                <h6 class="font-weight-bold text-dark m-0"><i
+                                        class="fas fa-list-ol text-primary mr-2"></i>Pratinjau Data (<span
+                                        id="previewCount">0</span> Mahasiswa)</h6>
                             </div>
                             <div class="table-responsive border rounded-bottom"
                                 style="max-height: 250px; overflow-y: auto;">
@@ -163,39 +184,38 @@
                                             <th width="10%" class="text-center border-0">Aksi</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        {{-- Data dari Excel akan muncul di sini --}}
-                                    </tbody>
+                                    <tbody></tbody>
                                 </table>
                             </div>
                         </div>
-
 
                         <h5 class="text-primary font-weight-bold border-bottom pb-2 mb-3 mt-4"><i
                                 class="fas fa-clipboard-check mr-2"></i>Catatan & Tanda Tangan</h5>
                         <div class="row mb-4">
                             <div class="col-md-12 form-group">
                                 <label>Kejadian selama praktikum berlangsung</label>
-                                <textarea name="kejadian" class="form-control" rows="3"></textarea>
+                                <textarea name="kejadian" class="form-control" rows="3">{{ $kejadian }}</textarea>
                             </div>
+
+                            {{-- Input Dosen, Teknisi, dan Tgl TTD Readonly --}}
                             <div class="col-md-4 form-group">
                                 <label>Dosen Pendamping</label>
-                                <input type="text" name="dosen_pendamping" class="form-control"
-                                    value="{{ $dosen }}" required>
+                                <input type="text" name="dosen_pendamping" class="form-control bg-light"
+                                    value="{{ $dosen }}" readonly tabindex="-1" required>
                             </div>
                             <div class="col-md-4 form-group">
                                 <label>Teknisi Pendamping / PLP</label>
-                                <input type="text" name="teknisi" class="form-control" value="{{ $teknisi }}"
-                                    required>
+                                <input type="text" name="teknisi" class="form-control bg-light"
+                                    value="{{ $teknisi }}" readonly tabindex="-1" required>
                             </div>
                             <div class="col-md-4 form-group">
                                 <label>Tempat, Tanggal TTD</label>
-                                <input type="text" id="tgl_ttd" name="tgl_ttd" class="form-control"
-                                    value="Sambas, {{ $tanggal ?: \Carbon\Carbon::now()->translatedFormat('d F Y') }}">
+                                <input type="text" id="tgl_ttd" name="tgl_ttd" class="form-control bg-light"
+                                    value="Sambas, {{ $tanggal ?: \Carbon\Carbon::now()->translatedFormat('d F Y') }}"
+                                    readonly tabindex="-1">
                             </div>
                         </div>
 
-                        {{-- AREA DIGITAL SIGNATURE --}}
                         <div class="row mb-4">
                             <div class="col-md-6 form-group">
                                 <label class="font-weight-bold text-dark">Tanda Tangan Dosen Pendamping</label>
@@ -203,23 +223,20 @@
                                     <canvas id="canvasDosen" width="400" height="200"
                                         style="width: 100%; border-bottom: 1px solid #dee2e6; cursor: crosshair; background: #fff;"></canvas>
                                     <div class="p-2 text-right">
-                                        <button type="button" class="btn btn-sm btn-dark" onclick="padDosen.clear()">
-                                            <i class="fas fa-eraser mr-1"></i> Hapus
-                                        </button>
+                                        <button type="button" class="btn btn-sm btn-dark" onclick="padDosen.clear()"><i
+                                                class="fas fa-eraser mr-1"></i> Hapus</button>
                                     </div>
                                 </div>
                                 <input type="hidden" name="ttd_dosen" id="ttd_dosen">
                             </div>
-
                             <div class="col-md-6 form-group">
                                 <label class="font-weight-bold text-dark">Tanda Tangan Teknisi / PLP</label>
                                 <div class="border rounded bg-secondary" style="overflow: hidden;">
                                     <canvas id="canvasTeknisi" width="400" height="200"
                                         style="width: 100%; border-bottom: 1px solid #dee2e6; cursor: crosshair; background: #fff;"></canvas>
                                     <div class="p-2 text-right">
-                                        <button type="button" class="btn btn-sm btn-dark" onclick="padTeknisi.clear()">
-                                            <i class="fas fa-eraser mr-1"></i> Hapus
-                                        </button>
+                                        <button type="button" class="btn btn-sm btn-dark"
+                                            onclick="padTeknisi.clear()"><i class="fas fa-eraser mr-1"></i> Hapus</button>
                                     </div>
                                 </div>
                                 <input type="hidden" name="ttd_teknisi" id="ttd_teknisi">
@@ -239,10 +256,6 @@
     </div>
 
     <style>
-        .custom-radius {
-            border-radius: 10px;
-        }
-
         #drop-zone:hover,
         #drop-zone.dragover {
             background-color: #e0e8ff !important;
@@ -256,14 +269,13 @@
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 
     <script>
-        // === SINKRONISASI TANGGAL ===
+        // Tanggal TTD dan Dokumen akan tetap tersinkron otomatis apabila Tanggal Praktikum diubah
         $('#tanggal_praktikum').on('input', function() {
             let val = $(this).val();
             $('#tgl_dokumen').val(val);
             $('#tgl_ttd').val('Sambas, ' + val);
         });
 
-        // === TANDA TANGAN ===
         const padDosen = new SignaturePad(document.getElementById('canvasDosen'), {
             backgroundColor: 'rgba(255,255,255,0)'
         });
@@ -276,11 +288,12 @@
             if (!padTeknisi.isEmpty()) $('#ttd_teknisi').val(padTeknisi.toDataURL('image/png'));
         });
 
-        // === TABEL ALAT & BAHAN ===
         function addAlatBahan() {
             $('#tableAlatBahan tbody').append(`<tr>
             <td><input type="text" name="alat[]" class="form-control form-control-sm"></td>
+            <td><input type="number" name="jml_alat[]" class="form-control form-control-sm text-center"></td>
             <td><input type="text" name="bahan[]" class="form-control form-control-sm"></td>
+            <td><input type="number" name="jml_bahan[]" class="form-control form-control-sm text-center"></td>
             <td class="text-center"><button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
         </tr>`);
         }
@@ -289,29 +302,21 @@
             $(btn).closest('tr').remove();
         }
 
-        // === HAPUS PESERTA DARI PREVIEW ===
         function removePeserta(btn) {
             $(btn).closest('tr').remove();
-
-            // Update penomoran dan hitungan
             let count = 0;
             $('#tablePreviewPeserta tbody tr').each(function() {
                 count++;
                 $(this).find('td:first').text(count);
             });
-
             $('#previewCount').text(count);
-            if (count === 0) {
-                $('#previewContainer').addClass('d-none');
-            }
+            if (count === 0) $('#previewContainer').addClass('d-none');
         }
 
-        // === LOGIKA DRAG & DROP EXCEL ===
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('fileExcel');
 
         dropZone.addEventListener('click', () => fileInput.click());
-
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, preventDefaults, false);
         });
@@ -338,10 +343,8 @@
             if (this.files.length) handleExcelFile(this.files[0]);
         });
 
-        // FUNGSI UTAMA PEMROSESAN EXCEL
         function handleExcelFile(file) {
             $('#file-name-display').text(file.name).removeClass('d-none');
-
             var reader = new FileReader();
             reader.readAsArrayBuffer(file);
             reader.onload = function(e) {
@@ -350,12 +353,10 @@
                     type: 'array'
                 });
                 var firstSheet = workbook.SheetNames[0];
-
                 var excelRows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], {
                     header: 1
                 });
 
-                // Bersihkan Tabel Preview Sebelumnya
                 $('#tablePreviewPeserta tbody').empty();
                 let importedCount = 0;
 
@@ -368,7 +369,6 @@
 
                         if (nama !== '') {
                             importedCount++;
-                            // Tambahkan data ke dalam tabel sebagai teks (untuk dilihat) dan input hidden (untuk dikirim ke controller)
                             let html = `<tr>
                             <td class="text-center align-middle">${importedCount}</td>
                             <td class="align-middle text-dark font-weight-medium">
@@ -383,14 +383,9 @@
                         }
                     }
                 }
-
-                // Tampilkan Tabel Preview
                 $('#previewCount').text(importedCount);
-                if (importedCount > 0) {
-                    $('#previewContainer').removeClass('d-none');
-                }
-
-                fileInput.value = ''; // Reset input
+                if (importedCount > 0) $('#previewContainer').removeClass('d-none');
+                fileInput.value = '';
             };
         }
     </script>

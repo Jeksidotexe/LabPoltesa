@@ -135,7 +135,6 @@
 
 <body onload="window.print()">
 
-    {{-- KOP SURAT --}}
     <table class="kop-table w-100">
         <tr>
             <td class="text-center" style="width: 15%;">
@@ -165,7 +164,6 @@
         </tr>
     </table>
 
-    {{-- INFO PRAKTIKUM --}}
     <table class="layout-table w-100 mt-10">
         <tr>
             <td width="15%">Pada Hari Ini</td>
@@ -205,31 +203,35 @@
         </tr>
     </table>
 
-    {{-- TABEL ALAT & BAHAN --}}
     <div class="mb-5">Alat dan Bahan yang digunakan:</div>
     <table class="data-table w-100 mb-5">
         <tr>
-            <th width="8%">No</th>
-            <th width="46%">Alat</th>
-            <th width="46%">Bahan</th>
+            <th width="5%">No</th>
+            <th width="35%">Alat</th>
+            <th width="10%">Jml</th>
+            <th width="35%">Bahan</th>
+            <th width="10%">Jml</th>
         </tr>
         @php
-            // PERBAIKAN: Mengambil data dan menghitung jumlah pastinya
             $alats = array_values(array_filter($data['alat'] ?? []));
+            $jmlAlats = array_values(array_filter($data['jml_alat'] ?? []));
             $bahans = array_values(array_filter($data['bahan'] ?? []));
+            $jmlBahans = array_values(array_filter($data['jml_bahan'] ?? []));
+
             $maxRows = max(count($alats), count($bahans));
-            $maxRows = $maxRows > 0 ? $maxRows : 1; // Minimal render 1 baris jika kosong
+            $maxRows = $maxRows > 0 ? $maxRows : 1;
         @endphp
         @for ($i = 0; $i < $maxRows; $i++)
             <tr>
                 <td class="text-center">{{ $i + 1 }}</td>
                 <td>{{ $alats[$i] ?? '' }}</td>
+                <td class="text-center">{{ $jmlAlats[$i] ?? '' }}</td>
                 <td>{{ $bahans[$i] ?? '' }}</td>
+                <td class="text-center">{{ $jmlBahans[$i] ?? '' }}</td>
             </tr>
         @endfor
     </table>
 
-    {{-- DAFTAR PESERTA (2 KOLOM) --}}
     <table class="layout-table w-100 mb-5 mt-10">
         <tr>
             <td width="40%">Jumlah Peserta sesuai daftar hadir:</td>
@@ -249,26 +251,21 @@
             <th width="42%">Nama & NIM</th>
         </tr>
         @php
-            // PERBAIKAN: Hitung baris hanya berdasarkan total peserta dibagi 2
             $pesertas = array_values(array_filter($data['peserta'] ?? []));
             $totalPeserta = count($pesertas);
             $barisBagi = ceil($totalPeserta / 2);
-            $barisBagi = $barisBagi > 0 ? $barisBagi : 1; // Minimal render 1 baris jika kosong
+            $barisBagi = $barisBagi > 0 ? $barisBagi : 1;
         @endphp
         @for ($i = 0; $i < $barisBagi; $i++)
             <tr>
-                {{-- Kolom Kiri --}}
                 <td class="text-center">{{ $i + 1 }}</td>
                 <td>{{ $pesertas[$i] ?? '' }}</td>
-
-                {{-- Kolom Kanan --}}
                 <td class="text-center">{{ $i + 1 + $barisBagi }}</td>
                 <td>{{ $pesertas[$i + $barisBagi] ?? '' }}</td>
             </tr>
         @endfor
     </table>
 
-    {{-- DOSEN, TEKNISI, & KEJADIAN --}}
     <table class="layout-table w-100 mt-10">
         <tr>
             <td width="20%">Dosen Pendamping</td>
@@ -288,39 +285,33 @@
         {{ $data['kejadian'] ?? '' }}
     </div>
 
-    {{-- AREA TANDA TANGAN --}}
     <table class="ttd-area">
         <tr>
             <td class="text-center">
                 Mengetahui,<br>
                 Dosen Pendamping
-
                 <div class="ttd-space text-center" style="position: relative;">
                     @if (!empty($data['ttd_dosen']))
                         <img src="{{ $data['ttd_dosen'] }}" alt="TTD Dosen"
                             style="height: 60px; max-width: 100%; object-fit: contain; margin-top: 5px;">
                     @endif
                 </div>
-
                 <span class="font-bold"
                     style="text-decoration: underline;">{{ $data['dosen_pendamping'] ?? '-' }}</span>
             </td>
             <td class="text-center" style="padding-left: 20%;">
                 {{ $data['tgl_ttd'] ?? 'Sambas, ......................' }}<br>
                 PLP / Teknisi
-
                 <div class="ttd-space text-center" style="position: relative;">
                     @if (!empty($data['ttd_teknisi']))
                         <img src="{{ $data['ttd_teknisi'] }}" alt="TTD Teknisi"
                             style="height: 60px; max-width: 100%; object-fit: contain; margin-top: 5px;">
                     @endif
                 </div>
-
                 <span class="font-bold" style="text-decoration: underline;">{{ $data['teknisi'] ?? '-' }}</span>
             </td>
         </tr>
     </table>
-
 </body>
 
 </html>

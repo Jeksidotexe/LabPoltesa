@@ -91,6 +91,7 @@
                                     <th width="10%" class="text-center">Jumlah</th>
                                     <th>Nama Bahan</th>
                                     <th width="10%" class="text-center">Jumlah</th>
+                                    <th width="12%" class="text-center">Satuan</th>
                                     <th width="50" class="text-center"><button type="button"
                                             class="btn btn-sm btn-primary" onclick="addAlatBahan()"><i
                                                 class="fas fa-plus"></i></button></th>
@@ -111,6 +112,9 @@
                                                     class="form-control form-control-sm"></td>
                                             <td><input type="number" name="jml_bahan[]"
                                                     class="form-control form-control-sm text-center"></td>
+                                            <td><input type="text" name="satuan_bahan[]"
+                                                    class="form-control form-control-sm text-center" placeholder="gr/ml">
+                                            </td>
                                             <td class="text-center"><button type="button" class="btn btn-sm btn-danger"
                                                     onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
                                         </tr>
@@ -126,6 +130,9 @@
                                                     class="form-control form-control-sm"></td>
                                             <td><input type="number" name="jml_bahan[]"
                                                     class="form-control form-control-sm text-center"></td>
+                                            <td><input type="text" name="satuan_bahan[]"
+                                                    class="form-control form-control-sm text-center" placeholder="gr/ml">
+                                            </td>
                                             <td class="text-center"><button type="button" class="btn btn-sm btn-danger"
                                                     onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
                                         </tr>
@@ -294,6 +301,7 @@
             <td><input type="number" name="jml_alat[]" class="form-control form-control-sm text-center"></td>
             <td><input type="text" name="bahan[]" class="form-control form-control-sm"></td>
             <td><input type="number" name="jml_bahan[]" class="form-control form-control-sm text-center"></td>
+            <td><input type="text" name="satuan_bahan[]" class="form-control form-control-sm text-center" placeholder="gr/ml"></td>
             <td class="text-center"><button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
         </tr>`);
         }

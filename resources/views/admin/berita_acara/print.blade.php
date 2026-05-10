@@ -69,7 +69,7 @@
             text-align: center;
             vertical-align: middle;
             width: 55%;
-            font-size: 15px;
+            font-size: 24px;
             font-weight: bold;
         }
 
@@ -188,7 +188,7 @@
         </tr>
     </table>
 
-    <div class="text-center font-bold mt-20 mb-5" style="text-decoration: underline;">TELAH DILAKSANAKAN PRAKTIKUM</div>
+    <div class="text-center font-bold mt-20 mb-5" style="font-size: 14px;">TELAH DILAKSANAKAN PRAKTIKUM</div>
 
     <table class="layout-table w-100 mb-5">
         <tr>
@@ -208,15 +208,16 @@
         <tr>
             <th width="5%">No</th>
             <th width="35%">Alat</th>
-            <th width="10%">Jml</th>
+            <th width="10%">Jumlah</th>
             <th width="35%">Bahan</th>
-            <th width="10%">Jml</th>
+            <th width="15%">Jumlah</th>
         </tr>
         @php
             $alats = array_values(array_filter($data['alat'] ?? []));
             $jmlAlats = array_values(array_filter($data['jml_alat'] ?? []));
             $bahans = array_values(array_filter($data['bahan'] ?? []));
             $jmlBahans = array_values(array_filter($data['jml_bahan'] ?? []));
+            $satuanBahans = array_values(array_filter($data['satuan_bahan'] ?? []));
 
             $maxRows = max(count($alats), count($bahans));
             $maxRows = $maxRows > 0 ? $maxRows : 1;
@@ -227,7 +228,7 @@
                 <td>{{ $alats[$i] ?? '' }}</td>
                 <td class="text-center">{{ $jmlAlats[$i] ?? '' }}</td>
                 <td>{{ $bahans[$i] ?? '' }}</td>
-                <td class="text-center">{{ $jmlBahans[$i] ?? '' }}</td>
+                <td class="text-center">{{ $jmlBahans[$i] ?? '' }} {{ $satuanBahans[$i] ?? '' }}</td>
             </tr>
         @endfor
     </table>

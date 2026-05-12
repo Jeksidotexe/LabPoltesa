@@ -61,7 +61,7 @@
                                     {{ $lab ? 'readonly' : 'required' }}>
                             </div>
                             <div class="col-md-4 form-group">
-                                <label>Semester <span class="text-danger">*</span></label>
+                                <label>Semester/Kelas <span class="text-danger">*</span></label>
                                 <input type="text" name="semester" class="form-control" value="{{ $semester }}"
                                     required>
                             </div>

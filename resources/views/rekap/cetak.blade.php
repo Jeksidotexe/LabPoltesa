@@ -177,7 +177,7 @@
                     {{-- Tanggal lengkap menggunakan hari dan nama bulan penuh --}}
                     <td>{{ \Carbon\Carbon::parse($row->tanggal)->translatedFormat('l, d F Y') }}</td>
                     <td>{{ $row->makul ? $row->makul->nama : '-' }}</td>
-                    <td style="text-align: center;">{{ $semester }} / {{ $prodi }}</td>
+                    <td style="text-align: center;">{{ $semester }}</td>
                     <td>{{ $namaDosen }}</td>
                     <td>{{ $row->beritaAcara->teknisi ?? '-' }}</td>
                     <td>{{ $row->beritaAcara->judul_praktikum ?? '-' }}</td>

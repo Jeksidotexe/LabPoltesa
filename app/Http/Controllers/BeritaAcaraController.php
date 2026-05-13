@@ -54,11 +54,11 @@ class BeritaAcaraController extends Controller
             ->addColumn('aksi', function ($row) use ($user) {
                 if ($user->role === 'Dosen') {
                     $btnClass = $row->beritaAcara ? 'btn-success' : 'btn-primary';
-                    $icon = $row->beritaAcara ? 'fa-edit' : 'fa-pen';
+                    $icon = $row->beritaAcara ? 'fa-edit' : 'fa-print';
                     return '<div class="d-flex justify-content-center"><a href="' . route('berita-acara.create', $row->id_pengajuan) . '" class="btn btn-sm ' . $btnClass . ' btn-rounded" title="Input Berita Acara"><i class="fas ' . $icon . '"></i></a></div>';
                 }
                 if ($row->beritaAcara) {
-                    return '<div class="d-flex justify-content-center"><a href="' . route('berita-acara.create', $row->id_pengajuan) . '" class="btn btn-sm btn-info btn-rounded" title="Cetak BA"><i class="fas fa-print"></i></a></div>';
+                    return '<div class="d-flex justify-content-center"><a href="' . route('berita-acara.create', $row->id_pengajuan) . '" class="btn btn-sm btn-info btn-rounded" title="Cetak Berita Acara"><i class="fas fa-print"></i></a></div>';
                 }
                 return '<div class="d-flex justify-content-center"><button class="btn btn-sm btn-secondary btn-rounded" disabled><i class="fas fa-clock"></i></button></div>';
             })

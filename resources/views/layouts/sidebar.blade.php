@@ -14,7 +14,7 @@
                 {{-- Menu Khusus Super Admin --}}
                 @if (auth()->user()->role == 'Super Admin')
                     <li class="list-divider"></li>
-                    <li class="nav-small-cap"><span class="hide-menu">Master Data</span></li>
+                    <li class="nav-small-cap"><span class="hide-menu">Data Master</span></li>
                     <li class="sidebar-item {{ request()->routeIs('pengguna.*') ? 'selected' : '' }}">
                         <a class="sidebar-link {{ request()->routeIs('pengguna.*') ? 'active' : '' }}"
                             href="{{ route('pengguna.index') }}">

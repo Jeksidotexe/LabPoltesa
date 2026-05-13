@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('laboratorium', function (Blueprint $table) {
             $table->id('id_lab');
+            $table->unsignedBigInteger('id_admin')->nullable();
             $table->string('nama', 20);
             $table->string('kode', 100);
             $table->string('lokasi', 100);
@@ -21,6 +22,9 @@ return new class extends Migration
             $table->enum('status', ['Aktif', 'Nonaktif']);
             $table->string('foto', 2048);
             $table->timestamps();
+
+            // Relasi
+            $table->foreign('id_admin')->references('id')->on('users')->onDelete('set null');
         });
     }
 

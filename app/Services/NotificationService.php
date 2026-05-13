@@ -36,98 +36,61 @@ class NotificationService
     {
         $notifs = collect();
 
-        // Verifikasi Akun
         $userMenunggu = User::where('status', 'Nonaktif')->count();
         if ($userMenunggu > 0) {
-            $notifs->push($this->formatNotif(
-                'fas fa-user-plus text-info',
-                "{$userMenunggu} Pengguna butuh verifikasi",
-                route('pengguna.index'),
-                'Memerlukan Tindakan'
-            ));
+            $notifs->push($this->formatNotif('fas fa-user-plus text-info', "{$userMenunggu} Pengguna butuh verifikasi", route('pengguna.index'), 'Memerlukan Tindakan'));
         }
 
-        // Finalisasi Pengajuan
         $pengajuanSuper = PengajuanPraktikum::where('status', 'Menunggu Super Admin')->get();
         $countSuper = $pengajuanSuper->count();
 
         if ($countSuper === 1) {
-            // Jika cuma 1, langsung tembak ke halaman Detail Pengajuan
-            $notifs->push($this->formatNotif(
-                'fas fa-file-signature text-primary',
-                "1 Pengajuan butuh finalisasi",
-                route('pengajuan.show', $pengajuanSuper->first()->id_pengajuan),
-                'Memerlukan Tindakan'
-            ));
+            $notifs->push($this->formatNotif('fas fa-file-signature text-primary', "1 Pengajuan butuh finalisasi", route('pengajuan.show', $pengajuanSuper->first()->id_pengajuan), 'Memerlukan Tindakan'));
         } elseif ($countSuper > 1) {
-            // Jika lebih dari 1, arahkan ke tabel Dashboard
-            $notifs->push($this->formatNotif(
-                'fas fa-file-signature text-primary',
-                "{$countSuper} Pengajuan butuh finalisasi",
-                route('dashboard'),
-                'Memerlukan Tindakan'
-            ));
+            $notifs->push($this->formatNotif('fas fa-file-signature text-primary', "{$countSuper} Pengajuan butuh finalisasi", route('dashboard'), 'Memerlukan Tindakan'));
         }
 
         return $notifs;
     }
 
     // ==========================================
-    // LOGIKA ADMIN
+    // LOGIKA ADMIN LAB (HANYA LAB MILIKNYA)
     // ==========================================
     private function getAdminNotifications($user)
     {
         $notifs = collect();
         $now = Carbon::now('Asia/Jakarta');
+        $labMilikAdmin = \App\Models\Laboratorium::where('id_admin', $user->id)->pluck('id_lab')->toArray();
 
-        // Peminjaman Lab Selesai
+        // Notifikasi Peminjaman Selesai (Cek Alat / Pengembalian)
         $butuhKembali = PengajuanPraktikum::where('status', 'Disetujui')
+            ->whereIn('id_lab', $labMilikAdmin)
             ->whereRaw("CONCAT(tanggal, ' ', jam_selesai) <= ?", [$now->format('Y-m-d H:i:s')])
             ->get();
 
         $countKembali = $butuhKembali->count();
 
         if ($countKembali === 1) {
-            // Jika cuma 1, langsung tembak ke halaman Detail Jadwal untuk dikembalikan
-            $notifs->push($this->formatNotif(
-                'fas fa-undo text-danger',
-                "1 Praktikum Selesai (Cek Alat)",
-                route('jadwal.show', $butuhKembali->first()->id_pengajuan),
-                'Segera Lakukan Pengecekan'
-            ));
+            $notifs->push($this->formatNotif('fas fa-undo text-danger', "1 Praktikum Selesai (Cek Alat)", route('jadwal.show', $butuhKembali->first()->id_pengajuan), 'Segera Lakukan Pengecekan'));
         } elseif ($countKembali > 1) {
-            // Jika banyak, arahkan ke tabel Jadwal Praktikum
-            $notifs->push($this->formatNotif(
-                'fas fa-undo text-danger',
-                "{$countKembali} Praktikum Selesai (Cek Alat)",
-                route('jadwal.index'),
-                'Segera Lakukan Pengecekan'
-            ));
+            $notifs->push($this->formatNotif('fas fa-undo text-danger', "{$countKembali} Praktikum Selesai (Cek Alat)", route('jadwal.index'), 'Segera Lakukan Pengecekan'));
         }
 
-        // Butuh Pembuatan Berita Acara
-        $butuhBA = PengajuanPraktikum::doesntHave('beritaAcara')
+        // Notifikasi Berita Acara yang Butuh Finalisasi Admin (Dosen sudah isi, Admin belum cetak)
+        $butuhCetak = PengajuanPraktikum::whereHas('beritaAcara', function ($q) {
+            // Cek apakah di JSON form_data BELUM ADA is_printed
+            $q->where('form_data', 'not like', '%"is_printed":true%');
+        })
+            ->whereIn('id_lab', $labMilikAdmin)
             ->whereIn('status', ['Disetujui', 'Selesai'])
             ->get();
 
-        $countBA = $butuhBA->count();
+        $countCetak = $butuhCetak->count();
 
-        if ($countBA === 1) {
-            // Jika cuma 1, langsung buka form Buat Berita Acara
-            $notifs->push($this->formatNotif(
-                'fas fa-print text-warning',
-                "1 Jadwal belum dibuat Berita Acara",
-                route('berita-acara.create', $butuhBA->first()->id_pengajuan),
-                'Menunggu Dicetak'
-            ));
-        } elseif ($countBA > 1) {
-            // Jika banyak, arahkan ke tabel antrean Berita Acara
-            $notifs->push($this->formatNotif(
-                'fas fa-print text-warning',
-                "{$countBA} Jadwal belum dibuat Berita Acara",
-                route('berita-acara.index'),
-                'Menunggu Dicetak'
-            ));
+        if ($countCetak === 1) {
+            $notifs->push($this->formatNotif('fas fa-print text-primary', "1 Berita Acara Menunggu Dicetak", route('berita-acara.create', $butuhCetak->first()->id_pengajuan), 'Segera Lengkapi & Cetak'));
+        } elseif ($countCetak > 1) {
+            $notifs->push($this->formatNotif('fas fa-print text-primary', "{$countCetak} Berita Acara Menunggu Dicetak", route('berita-acara.index'), 'Segera Lengkapi & Cetak'));
         }
 
         return $notifs;
@@ -139,8 +102,6 @@ class NotificationService
     private function getKaprodiNotifications($user)
     {
         $notifs = collect();
-
-        // Verifikasi Jadwal dari Dosen di Prodinya
         $pengajuanKaprodi = PengajuanPraktikum::where('status', 'Menunggu Kaprodi')
             ->whereHas('user', function ($q) use ($user) {
                 $q->where('id_prodi', $user->id_prodi);
@@ -149,21 +110,9 @@ class NotificationService
         $countKaprodi = $pengajuanKaprodi->count();
 
         if ($countKaprodi === 1) {
-            // Jika cuma 1, langsung buka halaman Detail Pengajuan
-            $notifs->push($this->formatNotif(
-                'fas fa-clipboard-check text-warning',
-                "1 Pengajuan butuh persetujuan",
-                route('pengajuan.show', $pengajuanKaprodi->first()->id_pengajuan),
-                'Memerlukan Tindakan'
-            ));
+            $notifs->push($this->formatNotif('fas fa-clipboard-check text-warning', "1 Pengajuan butuh persetujuan", route('pengajuan.show', $pengajuanKaprodi->first()->id_pengajuan), 'Memerlukan Tindakan'));
         } elseif ($countKaprodi > 1) {
-            // Jika banyak, arahkan ke tabel Dashboard
-            $notifs->push($this->formatNotif(
-                'fas fa-clipboard-check text-warning',
-                "{$countKaprodi} Pengajuan butuh persetujuan",
-                route('dashboard'),
-                'Memerlukan Tindakan'
-            ));
+            $notifs->push($this->formatNotif('fas fa-clipboard-check text-warning', "{$countKaprodi} Pengajuan butuh persetujuan", route('dashboard'), 'Memerlukan Tindakan'));
         }
 
         return $notifs;
@@ -175,25 +124,21 @@ class NotificationService
     private function getDosenNotifications($user)
     {
         $notifs = collect();
+        $now = Carbon::now('Asia/Jakarta');
 
-        $pengajuanUpdate = PengajuanPraktikum::with('makul')
+        // HANYA NOTIFIKASI BERBASIS TUGAS (ACTIONABLE)
+        $butuhBA = PengajuanPraktikum::doesntHave('beritaAcara')
             ->where('id_users', $user->id)
-            ->whereIn('status', ['Disetujui', 'Ditolak Kaprodi', 'Ditolak Super Admin', 'Selesai'])
-            ->orderBy('updated_at', 'desc')
-            ->take(3)
+            ->whereIn('status', ['Disetujui', 'Selesai'])
+            ->whereRaw("CONCAT(tanggal, ' ', jam_selesai) <= ?", [$now->format('Y-m-d H:i:s')])
             ->get();
 
-        foreach ($pengajuanUpdate as $p) {
-            $isSuccess = in_array($p->status, ['Disetujui', 'Selesai']);
-            $icon = $isSuccess ? 'fas fa-check-circle text-success' : 'fas fa-times-circle text-danger';
-            $makulNama = $p->makul->nama ?? 'Laboratorium';
+        $countBA = $butuhBA->count();
 
-            $notifs->push($this->formatNotif(
-                $icon,
-                "Jadwal {$makulNama}: {$p->status}",
-                route('pengajuan.show', $p->id_pengajuan),
-                Carbon::parse($p->updated_at)->locale('id')->diffForHumans()
-            ));
+        if ($countBA === 1) {
+            $notifs->push($this->formatNotif('fas fa-pen text-warning', "1 Praktikum Selesai (Isi Berita Acara)", route('berita-acara.create', $butuhBA->first()->id_pengajuan), 'Segera Lengkapi Form'));
+        } elseif ($countBA > 1) {
+            $notifs->push($this->formatNotif('fas fa-pen text-warning', "{$countBA} Praktikum Selesai (Isi Berita Acara)", route('berita-acara.index'), 'Segera Lengkapi Form'));
         }
 
         return $notifs;

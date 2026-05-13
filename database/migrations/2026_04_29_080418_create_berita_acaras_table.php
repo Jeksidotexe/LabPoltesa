@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('judul_praktikum')->nullable();
             $table->string('teknisi')->nullable();
             $table->text('kejadian')->nullable();
+            $table->json('form_data')->nullable();
             $table->timestamps();
 
             $table->foreign('id_pengajuan')->references('id_pengajuan')->on('pengajuan_praktikum')->onDelete('cascade');

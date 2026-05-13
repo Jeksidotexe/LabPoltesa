@@ -418,19 +418,25 @@ class PengajuanPraktikumController extends Controller
         try {
             DB::beginTransaction();
             $pengajuan = PengajuanPraktikum::findOrFail($id);
-            $pengajuan->update(['status' => 'Selesai']);
 
+            // Validasi Otoritas Lab: Hanya Admin Lab Tersebut yang Boleh Mengembalikan
+            if (Auth::user()->role == 'Admin') {
+                $labMilikAdmin = Laboratorium::where('id_admin', Auth::id())->pluck('id_lab')->toArray();
+                if (!in_array($pengajuan->id_lab, $labMilikAdmin)) {
+                    return response()->json(['message' => 'Anda tidak memiliki hak untuk memproses pengembalian di lab ini.'], 403);
+                }
+            }
+
+            $pengajuan->update(['status' => 'Selesai']);
             $alatPinjam = DB::table('pengajuan_alat')->where('id_pengajuan', $id)->get();
 
             foreach ($alatPinjam as $item) {
                 $id_alat = $item->id_alat;
 
-                // Ambil inputan dari form, jika kosong anggap 0
                 $jml_baik   = $request->jml_baik[$id_alat] ?? 0;
                 $jml_ringan = $request->jml_ringan[$id_alat] ?? 0;
                 $jml_berat  = $request->jml_berat[$id_alat] ?? 0;
 
-                // 1. Update riwayat di tabel Pivot
                 DB::table('pengajuan_alat')->where('id', $item->id)->update([
                     'status_kembali'   => 'Sudah',
                     'jml_kembali_baik' => $jml_baik,
@@ -439,20 +445,11 @@ class PengajuanPraktikumController extends Controller
                     'updated_at'       => now()
                 ]);
 
-                // 2. Update Stok di Tabel Master Alat
                 $alatMaster = Alat::find($id_alat);
                 if ($alatMaster) {
-                    // Tambahkan kembali ke stok 'Baik' agar bisa dipinjam orang lain
-                    if ($jml_baik > 0) {
-                        $alatMaster->increment('jumlah', $jml_baik);
-                    }
-                    // Tambahkan ke keranjang 'Rusak' (sebagai catatan aset yang rusak, tidak bisa dipinjam)
-                    if ($jml_ringan > 0) {
-                        $alatMaster->increment('jumlah_rusak_ringan', $jml_ringan);
-                    }
-                    if ($jml_berat > 0) {
-                        $alatMaster->increment('jumlah_rusak_berat', $jml_berat);
-                    }
+                    if ($jml_baik > 0) $alatMaster->increment('jumlah', $jml_baik);
+                    if ($jml_ringan > 0) $alatMaster->increment('jumlah_rusak_ringan', $jml_ringan);
+                    if ($jml_berat > 0) $alatMaster->increment('jumlah_rusak_berat', $jml_berat);
                 }
             }
 

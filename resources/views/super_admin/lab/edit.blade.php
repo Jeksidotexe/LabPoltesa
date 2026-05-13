@@ -17,8 +17,7 @@
                     </div>
                 </div>
                 <div class="col-5 text-right">
-                    <a href="{{ route('lab.index') }}"
-                        class="btn btn-sm btn-secondary">
+                    <a href="{{ route('lab.index') }}" class="btn btn-sm btn-secondary">
                         <i class="fa fa-arrow-left mr-2"></i> Kembali
                     </a>
                 </div>
@@ -97,14 +96,38 @@
                                             class="form-control custom-input select2-no-search @error('status') is-invalid @enderror"
                                             name="status" required>
                                             <option value="Aktif"
-                                                {{ old('status', $lab->status) == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                                                {{ old('status', $lab->status) == 'Aktif' ? 'selected' : '' }}>Aktif
+                                            </option>
                                             <option value="Nonaktif"
-                                                {{ old('status', $lab->status) == 'Nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                                                {{ old('status', $lab->status) == 'Nonaktif' ? 'selected' : '' }}>Nonaktif
+                                            </option>
                                         </select>
                                         @error('status')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
+                                </div>
+
+                                <div class="form-group mb-4">
+                                    <label class="form-label text-dark font-weight-medium">Teknisi</label>
+
+                                    <select
+                                        class="form-control custom-input select2-admin @error('id_admin') is-invalid @enderror"
+                                        name="id_admin" style="width: 100%;">
+
+                                        <option value="">-- Pilih Teknisi --</option>
+                                        @if (isset($admins))
+                                            @foreach ($admins as $admin)
+                                                <option value="{{ $admin->id }}"
+                                                    {{ old('id_admin', $lab->id_admin ?? '') == $admin->id ? 'selected' : '' }}>
+                                                    {{ $admin->nama_lengkap }}
+                                                </option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    @error('id_admin')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
                                 <div class="form-group mb-0">
@@ -141,7 +164,8 @@
                                             <i class="fas fa-cloud-upload-alt text-primary mb-2 fa-3x"></i>
                                             <h6 class="font-weight-bold text-dark mb-1 mt-2">Unggah Foto Baru</h6>
                                             <p class="text-muted font-12 mb-3">Tarik & Lepas atau Klik di sini</p>
-                                            <span class="badge bg-light-secondary text-secondary px-2 py-1 border">Maks: 2MB
+                                            <span class="badge bg-light-secondary text-secondary px-2 py-1 border">Maks:
+                                                2MB
                                                 | JPG, PNG</span>
                                         </div>
                                         <input type="file" id="foto" name="foto" class="d-none"
@@ -233,6 +257,12 @@
                 theme: "bootstrap-5",
                 width: '100%',
                 minimumResultsForSearch: Infinity
+            });
+
+            $('.select2-admin').select2({
+                theme: "bootstrap-5",
+                width: '100%',
+                placeholder: "-- Pilih Teknisi --"
             });
 
             // ==========================================

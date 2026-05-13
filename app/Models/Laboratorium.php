@@ -9,6 +9,7 @@ class Laboratorium extends Model
     protected $table = 'laboratorium';
     protected $primaryKey = 'id_lab';
     protected $fillable = [
+        'id_admin',
         'nama',
         'kode',
         'lokasi',
@@ -17,6 +18,11 @@ class Laboratorium extends Model
         'status',
         'foto'
     ];
+
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'id_admin', 'id');
+    }
 
     public function alat()
     {

@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\PengajuanPraktikum;
 use App\Models\BeritaAcara;
+use App\Models\Laboratorium;
+use App\Models\User;
 use Carbon\Carbon;
 
 class BeritaAcaraController extends Controller
@@ -17,96 +19,146 @@ class BeritaAcaraController extends Controller
 
     public function data()
     {
-        // Menampilkan jadwal yang sudah disetujui atau selesai saja
+        $user = Auth::user();
         $query = PengajuanPraktikum::with(['user', 'makul', 'beritaAcara'])
             ->whereIn('status', ['Disetujui', 'Selesai'])
             ->orderBy('tanggal', 'desc');
 
+        if ($user->role === 'Dosen') {
+            $query->where('id_users', $user->id);
+        } elseif ($user->role === 'Admin') {
+            $labMilikAdmin = Laboratorium::where('id_admin', $user->id)->pluck('id_lab')->toArray();
+            $query->whereIn('id_lab', $labMilikAdmin);
+        }
+
         return datatables()->of($query)
             ->addIndexColumn()
-            ->addColumn('tanggal', function ($row) {
-                return Carbon::parse($row->tanggal)->translatedFormat('d F Y');
-            })
-            ->addColumn('makul', function ($row) {
-                return $row->makul ? $row->makul->nama : '-';
-            })
+            ->addColumn('tanggal', fn($row) => Carbon::parse($row->tanggal)->translatedFormat('d F Y'))
+            ->addColumn('makul', fn($row) => $row->makul ? $row->makul->nama : '-')
             ->addColumn('dosen', function ($row) {
-                if ($row->user) {
-                    $namaLengkap = $row->user->nama ?? $row->user->username;
-                    if ($row->user->gelar_depan) $namaLengkap = $row->user->gelar_depan . ' ' . $namaLengkap;
-                    if ($row->user->gelar_belakang) $namaLengkap .= ', ' . $row->user->gelar_belakang;
-                    return $namaLengkap;
-                }
-                return '-';
+                if (!$row->user) return '-';
+                $u = $row->user;
+                $nama = $u->nama ?? $u->username;
+                if ($u->gelar_depan) $nama = $u->gelar_depan . ' ' . $nama;
+                if ($u->gelar_belakang) $nama .= ', ' . $u->gelar_belakang;
+                return $nama;
             })
-            ->addColumn('status_ba', function ($row) {
-                return $row->beritaAcara
-                    ? '<span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-circle mr-1"></i> Sudah Dibuat</span>'
-                    : '<span class="badge bg-warning text-dark px-2 py-1"><i class="fas fa-clock mr-1"></i> Belum Dibuat</span>';
-            })
-            ->addColumn('aksi', function ($row) {
+            ->addColumn('status_ba', function ($row) use ($user) {
                 if ($row->beritaAcara) {
-                    return '<div class="d-flex justify-content-center"><a href="' . route('berita-acara.create', $row->id_pengajuan) . '" class="btn btn-sm btn-info btn-rounded" title="Cetak Ulang / Edit BA"><i class="fas fa-print"></i></a></div>';
-                } else {
-                    return '<div class="d-flex justify-content-center"><a href="' . route('berita-acara.create', $row->id_pengajuan) . '" class="btn btn-sm btn-primary btn-rounded" title="Buat Berita Acara"><i class="fas fa-file-alt"></i></a></div>';
+                    return $user->role === 'Admin'
+                        ? '<span class="badge bg-info text-white px-2 py-1"><i class="fas fa-print mr-1"></i> Siap Dicetak</span>'
+                        : '<span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-circle mr-1"></i> Telah Diinput</span>';
                 }
+                return '<span class="badge bg-warning text-dark px-2 py-1"><i class="fas fa-clock mr-1"></i> Belum Dibuat</span>';
             })
-            ->rawColumns(['status_ba', 'aksi'])
-            ->make(true);
+            ->addColumn('aksi', function ($row) use ($user) {
+                if ($user->role === 'Dosen') {
+                    $btnClass = $row->beritaAcara ? 'btn-success' : 'btn-primary';
+                    $icon = $row->beritaAcara ? 'fa-edit' : 'fa-pen';
+                    return '<div class="d-flex justify-content-center"><a href="' . route('berita-acara.create', $row->id_pengajuan) . '" class="btn btn-sm ' . $btnClass . ' btn-rounded" title="Input Berita Acara"><i class="fas ' . $icon . '"></i></a></div>';
+                }
+                if ($row->beritaAcara) {
+                    return '<div class="d-flex justify-content-center"><a href="' . route('berita-acara.create', $row->id_pengajuan) . '" class="btn btn-sm btn-info btn-rounded" title="Cetak BA"><i class="fas fa-print"></i></a></div>';
+                }
+                return '<div class="d-flex justify-content-center"><button class="btn btn-sm btn-secondary btn-rounded" disabled><i class="fas fa-clock"></i></button></div>';
+            })
+            ->rawColumns(['status_ba', 'aksi'])->make(true);
     }
 
     public function create(?string $id = null)
     {
-        $pengajuan = null;
-        if ($id) {
-            $pengajuan = PengajuanPraktikum::with(['user', 'lab', 'makul', 'alat', 'beritaAcara'])->findOrFail($id);
-            $hari = Carbon::parse($pengajuan->tanggal)->translatedFormat('l');
-            $tanggal = Carbon::parse($pengajuan->tanggal)->translatedFormat('d F Y');
-            $waktu = substr($pengajuan->jam_mulai, 0, 5) . ' - ' . substr($pengajuan->jam_selesai, 0, 5) . ' WIB';
-
-            // Merangkai Nama Dosen Pendamping
-            $dosen = $pengajuan->user->nama;
-            if ($pengajuan->user->gelar_depan) $dosen = $pengajuan->user->gelar_depan . ' ' . $dosen;
-            if ($pengajuan->user->gelar_belakang) $dosen .= ', ' . $pengajuan->user->gelar_belakang;
-
-            $lab = $pengajuan->lab->nama ?? '';
-            $makul = $pengajuan->makul->nama ?? '';
-
-            // Auto-fill jika sudah pernah dibuat
-            $semester = $pengajuan->beritaAcara->semester ?? '';
-            $judul = $pengajuan->beritaAcara->judul_praktikum ?? '';
-            $kejadian = $pengajuan->beritaAcara->kejadian ?? '';
-        } else {
-            $hari = $tanggal = $waktu = $dosen = $lab = $makul = $semester = $judul = $kejadian = '';
-        }
-
+        $pengajuan = PengajuanPraktikum::with(['user', 'lab.admin', 'makul', 'alat', 'beritaAcara'])->findOrFail($id);
         $userLogin = Auth::user();
+        $role = $userLogin->role; // Variabel role untuk dikirim ke view
 
-        // Merangkai Nama Teknisi lengkap dengan gelar (jika ada)
-        $teknisi = $userLogin->nama ?? $userLogin->username;
-        if ($userLogin->nama) {
-            if ($userLogin->gelar_depan) $teknisi = $userLogin->gelar_depan . ' ' . $teknisi;
-            if ($userLogin->gelar_belakang) $teknisi .= ', ' . $userLogin->gelar_belakang;
+        // Security Check untuk Admin Lab
+        if ($role === 'Admin') {
+            $labMilikAdmin = Laboratorium::where('id_admin', $userLogin->id)->pluck('id_lab')->toArray();
+            if (!in_array($pengajuan->id_lab, $labMilikAdmin)) abort(403, 'Akses Ditolak.');
         }
 
-        return view('admin.berita_acara.create', compact('pengajuan', 'hari', 'tanggal', 'waktu', 'dosen', 'teknisi', 'lab', 'makul', 'semester', 'judul', 'kejadian'));
+        $hari = Carbon::parse($pengajuan->tanggal)->translatedFormat('l');
+        $tanggal = Carbon::parse($pengajuan->tanggal)->translatedFormat('d F Y');
+        $waktu = substr($pengajuan->jam_mulai, 0, 5) . ' - ' . substr($pengajuan->jam_selesai, 0, 5) . ' WIB';
+
+        // Merangkai Nama Dosen Pendamping
+        $u = $pengajuan->user;
+        $dosen = ($u->gelar_depan ? $u->gelar_depan . ' ' : '') . ($u->nama ?? $u->username) . ($u->gelar_belakang ? ', ' . $u->gelar_belakang : '');
+
+        // Merangkai Nama Teknisi Default (Berdasarkan Admin Lab Terkait)
+        $teknisiLogin = '';
+        if ($pengajuan->lab && $pengajuan->lab->admin) {
+            $adminLab = $pengajuan->lab->admin;
+            $teknisiLogin = ($adminLab->gelar_depan ? $adminLab->gelar_depan . ' ' : '') . ($adminLab->nama ?? $adminLab->username) . ($adminLab->gelar_belakang ? ', ' . $adminLab->gelar_belakang : '');
+        }
+
+        // Filter Daftar Teknisi MURNI hanya untuk Admin Lab tersebut
+        $idAdminLab = $pengajuan->lab->id_admin ?? null;
+
+        if ($idAdminLab) {
+            $listTeknisi = User::where('status', 'Aktif')
+                ->where('id', $idAdminLab)
+                ->get();
+
+            foreach ($listTeknisi as $t) {
+                $t->nama_lengkap = ($t->gelar_depan ? $t->gelar_depan . ' ' : '') . ($t->nama ?? $t->username) . ($t->gelar_belakang ? ', ' . $t->gelar_belakang : '');
+            }
+        } else {
+            $listTeknisi = collect();
+        }
+
+        $draft = $pengajuan->beritaAcara ? json_decode($pengajuan->beritaAcara->form_data, true) : [];
+
+        // LOGIKA ARRAY
+        $alats = $draft['alat'] ?? ($pengajuan->alat->pluck('nama_alat')->toArray() ?? []);
+        $jmlAlats = $draft['jml_alat'] ?? ($pengajuan->alat->pluck('pivot.jumlah_pinjam')->toArray() ?? []);
+        $bahans = $draft['bahan'] ?? [];
+        $jmlBahans = $draft['jml_bahan'] ?? [];
+        $satuans = $draft['satuan_bahan'] ?? [];
+
+        $countAlats = is_array($alats) ? count($alats) : 0;
+        $countBahans = is_array($bahans) ? count($bahans) : 0;
+        $maxRows = max($countAlats, $countBahans, 3);
+
+        return view('admin.berita_acara.create', compact(
+            'pengajuan',
+            'hari',
+            'tanggal',
+            'waktu',
+            'dosen',
+            'teknisiLogin',
+            'draft',
+            'listTeknisi',
+            'role',
+            'alats',
+            'jmlAlats',
+            'bahans',
+            'jmlBahans',
+            'satuans',
+            'maxRows'
+        ));
+    }
+
+    public function storeDraft(Request $request)
+    {
+        $formData = $request->except(['_token', 'id_pengajuan', 'semester', 'judul', 'kejadian']);
+        BeritaAcara::updateOrCreate(
+            ['id_pengajuan' => $request->id_pengajuan],
+            ['semester' => $request->semester, 'judul_praktikum' => $request->judul, 'kejadian' => $request->kejadian, 'form_data' => json_encode($formData)]
+        );
+        return redirect()->route('berita-acara.index')->with('success', 'Draft Berita Acara berhasil disimpan.');
     }
 
     public function print(Request $request)
     {
-        // Simpan Data Ke DB untuk Kebutuhan Rekap
         if ($request->filled('id_pengajuan')) {
+            $formData = $request->except(['_token', 'id_pengajuan', 'semester', 'judul', 'kejadian']);
+            $formData['is_printed'] = true;
             BeritaAcara::updateOrCreate(
                 ['id_pengajuan' => $request->id_pengajuan],
-                [
-                    'semester' => $request->semester,
-                    'judul_praktikum' => $request->judul,
-                    'kejadian' => $request->kejadian,
-                    'teknisi' => $request->teknisi
-                ]
+                ['semester' => $request->semester, 'judul_praktikum' => $request->judul, 'kejadian' => $request->kejadian, 'teknisi' => $request->teknisi, 'form_data' => json_encode($formData)]
             );
         }
-
         $data = $request->all();
         return view('admin.berita_acara.print', compact('data'));
     }

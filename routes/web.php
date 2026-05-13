@@ -72,11 +72,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('/alat', AlatController::class);
         Route::post('/alat/{id}/repair', [AlatController::class, 'repair'])->name('alat.repair');
         Route::post('/pengajuan/pengembalian/{id}', [PengajuanPraktikumController::class, 'returnPraktikum'])->name('pengajuan.return');
-
-        Route::get('/berita-acara', [BeritaAcaraController::class, 'index'])->name('berita-acara.index');
-        Route::get('/berita-acara/data', [BeritaAcaraController::class, 'data'])->name('berita-acara.data');
-        Route::get('/berita-acara/buat/{id?}', [BeritaAcaraController::class, 'create'])->name('berita-acara.create');
-        Route::post('/berita-acara/cetak', [BeritaAcaraController::class, 'print'])->name('berita-acara.print');
     });
 
     // === KHUSUS DOSEN ===
@@ -85,6 +80,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/pengajuan/data', [PengajuanPraktikumController::class, 'data'])->name('pengajuan.data');
         Route::get('/pengajuan/create', [PengajuanPraktikumController::class, 'create'])->name('pengajuan.create');
         Route::post('/pengajuan', [PengajuanPraktikumController::class, 'store'])->name('pengajuan.store');
+    });
+
+    // === AKSES BERSAMA: ADMIN & DOSEN ===
+    Route::middleware(['role:Admin,Dosen'])->group(function () {
+        Route::get('/berita-acara', [BeritaAcaraController::class, 'index'])->name('berita-acara.index');
+        Route::get('/berita-acara/data', [BeritaAcaraController::class, 'data'])->name('berita-acara.data');
+        Route::get('/berita-acara/buat/{id?}', [BeritaAcaraController::class, 'create'])->name('berita-acara.create');
+        Route::post('/berita-acara/store-draft', [BeritaAcaraController::class, 'storeDraft'])->name('berita-acara.storeDraft');
+        Route::post('/berita-acara/cetak', [BeritaAcaraController::class, 'print'])->name('berita-acara.print');
     });
 
     // === KHUSUS KAPRODI ===

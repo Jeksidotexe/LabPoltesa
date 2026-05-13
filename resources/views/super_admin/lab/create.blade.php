@@ -104,6 +104,28 @@
                                     </div>
                                 </div>
 
+                                <div class="form-group mb-4">
+                                    <label class="form-label text-dark font-weight-medium">Teknisi</label>
+
+                                    <select
+                                        class="form-control custom-input select2-admin @error('id_admin') is-invalid @enderror"
+                                        name="id_admin" style="width: 100%;">
+
+                                        <option value="">-- Pilih Teknisi --</option>
+                                        @if (isset($admins))
+                                            @foreach ($admins as $admin)
+                                                <option value="{{ $admin->id }}"
+                                                    {{ old('id_admin', $lab->id_admin ?? '') == $admin->id ? 'selected' : '' }}>
+                                                    {{ $admin->nama_lengkap }}
+                                                </option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    @error('id_admin')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
                                 <div class="form-group mb-0">
                                     <label class="form-label text-dark font-weight-medium">Deskripsi Laboratorium <span
                                             class="text-danger">*</span></label>
@@ -161,10 +183,12 @@
                                 {{-- Tombol Aksi --}}
                                 <div class="mt-auto">
                                     <hr class="my-4 border-light">
-                                    <button type="submit" class="btn btn-sm btn-success btn-block font-weight-medium py-2 shadow-sm mb-2">
+                                    <button type="submit"
+                                        class="btn btn-sm btn-success btn-block font-weight-medium py-2 shadow-sm mb-2">
                                         <i class="fa fa-save mr-2"></i> Simpan
                                     </button>
-                                    <button type="reset" class="btn btn-sm btn-light btn-block font-weight-medium py-2 shadow-sm">
+                                    <button type="reset"
+                                        class="btn btn-sm btn-light btn-block font-weight-medium py-2 shadow-sm">
                                         <i class="fa fa-undo mr-2"></i> Reset
                                     </button>
                                 </div>
@@ -221,6 +245,12 @@
                 theme: "bootstrap-5",
                 width: '100%',
                 minimumResultsForSearch: Infinity
+            });
+
+            $('.select2-admin').select2({
+                theme: "bootstrap-5",
+                width: '100%',
+                placeholder: "-- Pilih Teknisi --"
             });
 
             // ==========================================

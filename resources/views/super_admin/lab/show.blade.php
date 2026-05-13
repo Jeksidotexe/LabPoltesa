@@ -16,12 +16,10 @@
                     </nav>
                 </div>
                 <div class="col-md-5 col-12 mt-2 mt-md-0 text-md-right">
-                    <a href="{{ route('lab.index') }}"
-                        class="btn btn-sm btn-secondary font-weight-medium mr-2">
+                    <a href="{{ route('lab.index') }}" class="btn btn-sm btn-secondary font-weight-medium mr-2">
                         <i class="fa fa-arrow-left mr-1"></i> Kembali
                     </a>
-                    <a href="{{ route('lab.edit', $lab->id_lab) }}"
-                        class="btn btn-sm btn-primary font-weight-medium">
+                    <a href="{{ route('lab.edit', $lab->id_lab) }}" class="btn btn-sm btn-primary font-weight-medium">
                         <i data-feather="edit-2" class="mr-1" style="width: 12px; height: 12px;"></i> Edit
                     </a>
                 </div>
@@ -83,6 +81,20 @@
                                 <div class="d-flex align-items-center text-dark">
                                     <i data-feather="users" class="text-muted mr-2" style="width: 16px; height: 16px;"></i>
                                     <span class="font-weight-semibold font-14">{{ $lab->kapasitas }} Orang</span>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12 mb-4">
+                                <small class="text-muted d-block mb-1 font-weight-medium text-uppercase font-11">Teknisi</small>
+                                <div class="d-flex align-items-center text-dark">
+                                    <i data-feather="user" class="text-muted mr-2" style="width: 16px; height: 16px;"></i>
+                                    <span class="font-weight-semibold font-14">
+                                        @if ($namaAdminLengkap)
+                                            {{ $namaAdminLengkap }}
+                                        @else
+                                            <span class="text-danger font-italic font-13">Belum Ditentukan</span>
+                                        @endif
+                                    </span>
                                 </div>
                             </div>
                         </div>

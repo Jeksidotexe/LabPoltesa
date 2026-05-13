@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alat;
+use App\Models\BeritaAcara;
 use App\Models\Laboratorium;
 use App\Models\PengajuanPraktikum;
 use App\Models\User;
@@ -45,16 +46,20 @@ class DashboardController extends Controller
                 'antrean_akun'
             ));
         } elseif ($role == 'Admin') {
-            // --- STATISTIK KHUSUS ADMIN ---
-            $total     = PengajuanPraktikum::count();
-            $proses    = PengajuanPraktikum::whereIn('status', ['Menunggu Kaprodi', 'Menunggu Super Admin'])->count();
-            // Disetujui digabungkan dengan Selesai sebagai indikator sukses
-            $disetujui = PengajuanPraktikum::whereIn('status', ['Disetujui', 'Selesai'])->count();
-            $ditolak   = PengajuanPraktikum::where('status', 'like', '%Ditolak%')->count();
+            // --- STATISTIK KHUSUS ADMIN (HANYA LAB MILIKNYA) ---
+            $labMilikAdmin = Laboratorium::where('id_admin', $user->id)->pluck('id_lab')->toArray();
 
-            $total_jenis_alat  = Alat::count() ?? 0;
-            $total_unit_barang = Alat::sum('jumlah') ?? 0;
-            $berita_acara      = 0;
+            $total     = PengajuanPraktikum::whereIn('id_lab', $labMilikAdmin)->count();
+            $proses    = PengajuanPraktikum::whereIn('id_lab', $labMilikAdmin)->whereIn('status', ['Menunggu Kaprodi', 'Menunggu Super Admin'])->count();
+            $disetujui = PengajuanPraktikum::whereIn('id_lab', $labMilikAdmin)->whereIn('status', ['Disetujui', 'Selesai'])->count();
+            $ditolak   = PengajuanPraktikum::whereIn('id_lab', $labMilikAdmin)->where('status', 'like', '%Ditolak%')->count();
+
+            $total_jenis_alat  = Alat::whereIn('id_lab', $labMilikAdmin)->count() ?? 0;
+            $total_unit_barang = Alat::whereIn('id_lab', $labMilikAdmin)->sum('jumlah') ?? 0;
+
+            $berita_acara = BeritaAcara::whereHas('pengajuan', function ($q) use ($labMilikAdmin) {
+                $q->whereIn('id_lab', $labMilikAdmin);
+            })->count();
 
             return view('admin.index', compact(
                 'total',
@@ -171,84 +176,54 @@ class DashboardController extends Controller
     public function dataPengajuan()
     {
         $user = Auth::user();
-
         $query = PengajuanPraktikum::with(['user', 'lab', 'makul'])->orderBy('created_at', 'desc');
 
-        // Logic Filter Berdasarkan Role
         if ($user->role === 'Dosen') {
             $query->where('id_users', $user->id);
         } elseif ($user->role === 'Kaprodi') {
-            // KAPRODI HANYA MELIHAT DATA DARI PRODI YANG SAMA
             $query->whereHas('user', function ($q) use ($user) {
                 $q->where('id_prodi', $user->id_prodi);
             });
-        } elseif ($user->role === 'Super Admin' || $user->role === 'Admin') {
-            // Menambahkan status 'Selesai' dan role 'Admin' agar bisa melihat list list yang relevan
+        } elseif ($user->role === 'Super Admin') {
             $query->whereIn('status', ['Menunggu Super Admin', 'Disetujui', 'Ditolak Super Admin', 'Selesai']);
+        } elseif ($user->role === 'Admin') {
+            // FILTER KHUSUS ADMIN LAB (HANYA LABNYA SENDIRI)
+            $labMilikAdmin = Laboratorium::where('id_admin', $user->id)->pluck('id_lab')->toArray();
+            $query->whereIn('id_lab', $labMilikAdmin)
+                ->whereIn('status', ['Menunggu Super Admin', 'Disetujui', 'Ditolak Super Admin', 'Selesai']);
         }
 
-        return datatables()
-            ->of($query)
+        return datatables()->of($query)
             ->addIndexColumn()
             ->addColumn('dosen_nama', function ($row) {
-                if ($row->user) {
-                    if ($row->user->nama) {
-                        $namaLengkap = $row->user->nama;
-                        if ($row->user->gelar_depan) {
-                            $namaLengkap = $row->user->gelar_depan . ' ' . $namaLengkap;
-                        }
-                        if ($row->user->gelar_belakang) {
-                            $namaLengkap .= ', ' . $row->user->gelar_belakang;
-                        }
-                        return $namaLengkap;
-                    }
-                    return $row->user->username;
+                if (!$row->user) return '-';
+                if ($row->user->nama) {
+                    $namaLengkap = $row->user->nama;
+                    if ($row->user->gelar_depan) $namaLengkap = $row->user->gelar_depan . ' ' . $namaLengkap;
+                    if ($row->user->gelar_belakang) $namaLengkap .= ', ' . $row->user->gelar_belakang;
+                    return $namaLengkap;
                 }
-                return '-';
+                return $row->user->username;
             })
-            ->addColumn('lab_nama', function ($row) {
-                return $row->lab ? $row->lab->nama : '-';
-            })
-            ->addColumn('makul_nama', function ($row) {
-                return $row->makul ? $row->makul->nama : '-';
-            })
-            ->editColumn('tanggal', function ($row) {
-                return Carbon::parse($row->tanggal)->translatedFormat('d F Y');
-            })
-            ->editColumn('jam_mulai', function ($row) {
-                return substr($row->jam_mulai, 0, 5);
-            })
-            ->editColumn('jam_selesai', function ($row) {
-                return substr($row->jam_selesai, 0, 5);
-            })
+            ->addColumn('lab_nama', fn($row) => $row->lab ? $row->lab->nama : '-')
+            ->addColumn('makul_nama', fn($row) => $row->makul ? $row->makul->nama : '-')
+            ->editColumn('tanggal', fn($row) => Carbon::parse($row->tanggal)->translatedFormat('d F Y'))
+            ->editColumn('jam_mulai', fn($row) => substr($row->jam_mulai, 0, 5))
+            ->editColumn('jam_selesai', fn($row) => substr($row->jam_selesai, 0, 5))
             ->addColumn('status_badge', function ($row) use ($user) {
                 $status = $row->status;
-
-                // --- TAMPILAN BADGE KHUSUS KAJUR ---
                 if ($user->role === 'Kajur') {
-                    if ($status == 'Menunggu Kaprodi') {
-                        return '<span class="badge bg-warning text-dark px-2 py-1"><i class="fas fa-clock mr-1"></i> Verifikasi Kaprodi</span>';
-                    } elseif ($status == 'Menunggu Super Admin') {
-                        return '<span class="badge bg-primary text-white px-2 py-1"><i class="fas fa-spinner fa-spin mr-1"></i> Verifikasi Super Admin</span>';
-                    } elseif ($status == 'Disetujui') {
-                        return '<span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-circle mr-1"></i> Telah Disetujui</span>';
-                    } elseif ($status == 'Selesai') {
-                        return '<span class="badge bg-info text-white px-2 py-1"><i class="fas fa-flag-checkered mr-1"></i> Selesai</span>';
-                    } elseif (str_contains($status, 'Ditolak')) {
-                        return '<span class="badge bg-danger text-white px-2 py-1"><i class="fas fa-ban mr-1"></i> ' . $status . '</span>';
-                    }
+                    if ($status == 'Menunggu Kaprodi') return '<span class="badge bg-warning text-dark px-2 py-1"><i class="fas fa-clock mr-1"></i> Verifikasi Kaprodi</span>';
+                    elseif ($status == 'Menunggu Super Admin') return '<span class="badge bg-primary text-white px-2 py-1"><i class="fas fa-spinner fa-spin mr-1"></i> Verifikasi Super Admin</span>';
+                    elseif ($status == 'Disetujui') return '<span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-circle mr-1"></i> Telah Disetujui</span>';
+                    elseif ($status == 'Selesai') return '<span class="badge bg-info text-white px-2 py-1"><i class="fas fa-flag-checkered mr-1"></i> Selesai</span>';
+                    elseif (str_contains($status, 'Ditolak')) return '<span class="badge bg-danger text-white px-2 py-1"><i class="fas fa-ban mr-1"></i> ' . $status . '</span>';
                 }
 
-                // --- TAMPILAN BADGE STANDAR UNTUK ROLE LAIN ---
-                if ($status == 'Disetujui') {
-                    return '<span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-circle mr-1"></i> Telah Disetujui</span>';
-                } elseif ($status == 'Selesai') {
-                    return '<span class="badge bg-primary text-white px-2 py-1"><i class="fas fa-flag-checkered mr-1"></i> Selesai</span>';
-                } elseif (str_contains($status, 'Ditolak')) {
-                    return '<span class="badge bg-danger text-white px-2 py-1"><i class="fas fa-times-circle mr-1"></i> Ditolak</span>';
-                } else {
-                    return '<span class="badge bg-warning text-dark px-2 py-1"><i class="fas fa-sync-alt fa-spin mr-1"></i> Diproses</span>';
-                }
+                if ($status == 'Disetujui') return '<span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-circle mr-1"></i> Telah Disetujui</span>';
+                elseif ($status == 'Selesai') return '<span class="badge bg-primary text-white px-2 py-1"><i class="fas fa-flag-checkered mr-1"></i> Selesai</span>';
+                elseif (str_contains($status, 'Ditolak')) return '<span class="badge bg-danger text-white px-2 py-1"><i class="fas fa-times-circle mr-1"></i> Ditolak</span>';
+                else return '<span class="badge bg-warning text-dark px-2 py-1"><i class="fas fa-sync-alt fa-spin mr-1"></i> Diproses</span>';
             })
             ->addColumn('aksi', function ($row) {
                 $btn = '<a href="' . route('pengajuan.show', $row->id_pengajuan) . '" class="btn btn-rounded btn-sm btn-info" title="Detail"><i class="fa fa-eye"></i></a>';

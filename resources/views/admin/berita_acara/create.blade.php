@@ -113,7 +113,7 @@
                                             <td><input type="number" name="jml_bahan[]"
                                                     class="form-control form-control-sm text-center"></td>
                                             <td><input type="text" name="satuan_bahan[]"
-                                                    class="form-control form-control-sm text-center" placeholder="gr/ml">
+                                                    class="form-control form-control-sm text-center">
                                             </td>
                                             <td class="text-center"><button type="button" class="btn btn-sm btn-danger"
                                                     onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
@@ -131,7 +131,7 @@
                                             <td><input type="number" name="jml_bahan[]"
                                                     class="form-control form-control-sm text-center"></td>
                                             <td><input type="text" name="satuan_bahan[]"
-                                                    class="form-control form-control-sm text-center" placeholder="gr/ml">
+                                                    class="form-control form-control-sm text-center">
                                             </td>
                                             <td class="text-center"><button type="button" class="btn btn-sm btn-danger"
                                                     onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
@@ -301,7 +301,7 @@
             <td><input type="number" name="jml_alat[]" class="form-control form-control-sm text-center"></td>
             <td><input type="text" name="bahan[]" class="form-control form-control-sm"></td>
             <td><input type="number" name="jml_bahan[]" class="form-control form-control-sm text-center"></td>
-            <td><input type="text" name="satuan_bahan[]" class="form-control form-control-sm text-center" placeholder="gr/ml"></td>
+            <td><input type="text" name="satuan_bahan[]" class="form-control form-control-sm text-center"></td>
             <td class="text-center"><button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
         </tr>`);
         }

@@ -90,6 +90,15 @@
                             <span class="hide-menu">Riwayat Pengajuan</span>
                         </a>
                     </li>
+
+                    {{-- PERBAIKAN: Menambahkan Menu Berita Acara untuk Dosen --}}
+                    <li class="sidebar-item {{ request()->routeIs('berita-acara.*') ? 'selected' : '' }}">
+                        <a class="sidebar-link {{ request()->routeIs('berita-acara.*') ? 'active' : '' }}"
+                            href="{{ route('berita-acara.index') }}" aria-expanded="false">
+                            <i data-feather="file-text" class="feather-icon"></i>
+                            <span class="hide-menu">Berita Acara</span>
+                        </a>
+                    </li>
                 @endif
 
                 {{-- ======================================================== --}}

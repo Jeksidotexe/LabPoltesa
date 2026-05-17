@@ -250,10 +250,18 @@
                             {{-- Aksi Pengembalian Alat (KHUSUS ADMIN) --}}
                             @if (isset($canReturn) && $canReturn)
                                 <div class="mt-4 pt-4 border-top">
-                                    <button type="button" class="btn btn-sm btn-primary btn-block font-weight-medium"
-                                        data-toggle="modal" data-target="#modalKembali">
-                                        <i class="fas fa-box-open mr-1"></i> Kembalikan Alat & Selesai
-                                    </button>
+                                    {{-- LOGIKA BARU: Cek Apakah Ada Alat Yang Dipinjam --}}
+                                    @if ($pengajuan->alat->count() > 0)
+                                        <button type="button" class="btn btn-sm btn-primary btn-block font-weight-medium"
+                                            data-toggle="modal" data-target="#modalKembali">
+                                            <i class="fas fa-box-open mr-1"></i> Konfirmasi Selesai
+                                        </button>
+                                    @else
+                                        <button type="button" class="btn btn-sm btn-primary btn-block font-weight-medium"
+                                            onclick="confirmSelesaiTanpaAlat()">
+                                            <i class="fas fa-check-circle mr-1"></i> Konfirmasi Selesai
+                                        </button>
+                                    @endif
                                 </div>
                             @endif
 
@@ -397,9 +405,35 @@
 
         // LOGIKA PENYELESAIAN PRAKTIKUM & PENGEMBALIAN ALAT
         @if (isset($canReturn) && $canReturn)
+
+            function confirmSelesaiTanpaAlat() {
+                Swal.fire({
+                    title: 'Selesaikan Praktikum?',
+                    text: "Tidak ada alat yang dipinjam pada sesi ini. Yakin ingin mengkonfirmasi penyelesaian?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-check mr-1"></i> Ya, Selesaikan',
+                    cancelButtonText: '<i class="fas fa-times mr-1"></i> Batal',
+
+                    buttonsStyling: false,
+                    customClass: {
+                        confirmButton: 'btn btn-sm btn-dark px-3 mx-2',
+                        cancelButton: 'btn btn-sm btn-secondary px-3 mx-2'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        submitPengembalian();
+                    }
+                });
+            }
+
             function submitPengembalian() {
                 let btn = $('#btn-submit-kembali');
-                btn.html('<i class="fas fa-spinner fa-spin mr-1"></i> Memproses...').prop('disabled', true);
+
+                // Mencegah error null apabila btn tidak ada karena dipanggil lewat SweetAlert
+                if (btn.length) {
+                    btn.html('<i class="fas fa-spinner fa-spin mr-1"></i> Memproses...').prop('disabled', true);
+                }
 
                 $.post('{{ route('pengajuan.return', $pengajuan->id_pengajuan) }}', $('#form-pengembalian').serialize() +
                         '&_token={{ csrf_token() }}')
@@ -414,7 +448,9 @@
                             })
                             .then(() => window.location.reload());
                     }).fail(() => {
-                        btn.html('<i class="fas fa-check mr-1"></i> Konfirmasi Selesai').prop('disabled', false);
+                        if (btn.length) {
+                            btn.html('<i class="fas fa-check mr-1"></i> Konfirmasi Selesai').prop('disabled', false);
+                        }
                         Swal.fire({
                             icon: 'error',
                             title: 'Gagal!',
